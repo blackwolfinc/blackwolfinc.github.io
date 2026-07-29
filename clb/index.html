@@ -60,6 +60,14 @@
     .fab .fexp svg{width:20px;height:20px;transition:transform .3s}
     body.nav-open .fab .fexp svg{transform:rotate(180deg)}
     body.pidle.mode-poster .fab{opacity:.28}
+    .sndbtn{position:fixed;left:max(14px,calc(env(safe-area-inset-left) + 8px));bottom:max(14px,calc(env(safe-area-inset-bottom) + 8px));z-index:90;
+      width:46px;height:46px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+      background:rgba(22,20,42,.52);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,.22);box-shadow:0 10px 34px rgba(0,0,0,.32);color:#fff;cursor:pointer;transition:opacity .35s}
+    .sndbtn svg{width:22px;height:22px}
+    body.mode-app .sndbtn{display:none}
+    body.pidle.mode-poster .sndbtn{opacity:.28}
+    @media (min-width:900px){.sndbtn{width:54px;height:54px}.sndbtn svg{width:26px;height:26px}}
 
     .view{display:none}.view.active{display:block}
 
@@ -300,6 +308,8 @@
     /* ---- a11y & micro-interactions ---- */
     :focus-visible{outline:2px solid var(--brand2);outline-offset:2px;border-radius:6px}
     #dk-label{font-variant-numeric:tabular-nums}
+    body.attracting #dk-label::after{content:" · Auto";color:var(--brand2);font-weight:800}
+    body.attracting #dk-bar{box-shadow:0 0 12px var(--brand2)}
     .icard:active,.lcard:active,.geo-card:active,.chan-cards .cc:active,.ov-card:active,.stat-tile:active{transform:scale(.985)}
     @media (prefers-reduced-motion: reduce){
       *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important;scroll-behavior:auto !important}
@@ -322,9 +332,9 @@
     <div class="tbrow">
       <div class="brand"><img src="assets/ch-logo.svg" alt="" style="height:24px"><span>Sổ <b>CLB</b> số</span></div>
       <div class="spacer"></div>
-      <button class="langtog" id="langBtn" title="Ngôn ngữ / Language"><b>EN</b> · VI</button>
-      <button class="iconbtn" id="fsBtn" title="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
-      <button class="iconbtn" id="closeNav" title="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <button class="langtog" id="langBtn" title="Ngôn ngữ / Language" aria-label="Toggle language English or Vietnamese"><b>EN</b> · VI</button>
+      <button class="iconbtn" id="fsBtn" title="Fullscreen" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      <button class="iconbtn" id="closeNav" title="Close" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
   </header>
 
@@ -340,31 +350,35 @@
   <!-- APP DECK -->
   <section class="view" id="view-app">
     <div id="deck"></div>
-    <button class="dk-arw" id="dk-prev" title="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <button class="dk-arw" id="dk-next" title="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-    <div id="dk-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span>Overview</span></div>
+    <button class="dk-arw" id="dk-prev" title="Previous" aria-label="Previous step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="dk-arw" id="dk-next" title="Next" aria-label="Next step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div id="dk-ov" role="button" tabindex="0" aria-label="Overview and search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span>Overview</span></div>
     <div id="dk-foot"><div id="dk-bar"></div><div id="dk-label"></div></div>
   </section>
+
+  <!-- background music (poster) -->
+  <audio id="bgm" loop preload="auto" src="assets/bg-music.mp3"></audio>
+  <button class="sndbtn" id="sndBtn" aria-label="Bật/tắt nhạc nền — Toggle music" title="Music"></button>
 
   <!-- FLOATING NAV -->
   <div class="fab" id="fab">
     <button class="ftab active" data-tab="poster">Poster</button>
     <button class="ftab" data-tab="app">App</button>
     <span class="fdiv"></span>
-    <button class="fexp" id="fexp" title="More"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button>
+    <button class="fexp" id="fexp" title="More" aria-label="More options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button>
   </div>
 
   <!-- OVERVIEW -->
-  <div id="ov"><div class="ov-x" id="ov-x">&times;</div><h2 id="ov-title">Overview — jump to a section</h2>
+  <div id="ov" role="dialog" aria-modal="true" aria-label="Overview"><div class="ov-x" id="ov-x" role="button" tabindex="0" aria-label="Close">&times;</div><h2 id="ov-title">Overview — jump to a section</h2>
     <input id="ov-search" type="search" placeholder="Search screens…" autocomplete="off">
     <div id="ov-results"></div>
     <div class="ov-grid" id="ov-grid"></div></div>
 
   <!-- inline PDF viewer -->
-  <div id="pdfview"><div class="pv-bar"><b id="pv-title"></b><div class="pv-x" id="pv-x">&times;</div></div><iframe id="pv-frame" title="PDF"></iframe></div>
+  <div id="pdfview"><div class="pv-bar"><b id="pv-title"></b><div class="pv-x" id="pv-x" role="button" tabindex="0" aria-label="Close PDF">&times;</div></div><iframe id="pv-frame" title="PDF"></iframe></div>
 
   <!-- LIGHTBOX -->
-  <div id="lb"><div class="x" id="lb-x">&times;</div><div class="arw prev" id="lb-prev">&#8249;</div><div class="arw next" id="lb-next">&#8250;</div><div class="box"><img id="lb-img" src="" alt=""><div class="cap" id="lb-cap"></div></div></div>
+  <div id="lb" role="dialog" aria-modal="true" aria-label="Screenshot viewer"><div class="x" id="lb-x" role="button" tabindex="0" aria-label="Close">&times;</div><div class="arw prev" id="lb-prev" role="button" tabindex="0" aria-label="Previous image">&#8249;</div><div class="arw next" id="lb-next" role="button" tabindex="0" aria-label="Next image">&#8250;</div><div class="box"><img id="lb-img" src="" alt=""><div class="cap" id="lb-cap"></div></div></div>
 
   <script>
   /* ==================== POSTER ==================== */
@@ -646,6 +660,7 @@
     document.body.classList.toggle('mode-app',!posterActive);
     if(posterActive){pPlaying=true;pRestart();wake();}
     else{document.body.classList.remove('pidle');pStop();renderDeck();}
+    if(typeof updateBGM==='function')updateBGM();
   }
   document.querySelectorAll('.ftab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
   function setNav(open){document.body.classList.toggle('nav-open',open);}
@@ -761,8 +776,8 @@
 
   /* ==================== attract mode + idle reset ==================== */
   let attractT=null,autoT=null,attracting=false;const IDLE_MS=45000,AUTO_MS=9000;
-  function stopAuto(){attracting=false;clearInterval(autoT);autoT=null;}
-  function startAuto(){if(posterActive)return;attracting=true;autoT=setInterval(()=>{if(document.hidden)return;deckJump(deckIdx>=STEPS.length-1?0:deckIdx+1);},AUTO_MS);}
+  function stopAuto(){attracting=false;document.body.classList.remove('attracting');clearInterval(autoT);autoT=null;}
+  function startAuto(){if(posterActive)return;attracting=true;document.body.classList.add('attracting');autoT=setInterval(()=>{if(document.hidden)return;deckJump(deckIdx>=STEPS.length-1?0:deckIdx+1);},AUTO_MS);}
   function deckIdle(){clearTimeout(attractT);if(attracting)stopAuto();if(!posterActive)attractT=setTimeout(startAuto,IDLE_MS);}
   ['pointerdown','keydown','wheel','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{if(attracting)stopAuto();deckIdle();},{passive:true}));
 
@@ -805,8 +820,25 @@
     window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});});
   }
 
+  /* ==================== background music (poster) ==================== */
+  const bgm=document.getElementById('bgm'),sndBtn=document.getElementById('sndBtn');
+  let bgmMuted=false; try{bgmMuted=localStorage.getItem('clbMuted')==='1';}catch(e){}
+  let userGesture=false;
+  const IC_SND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.8 5.5a9 9 0 0 1 0 13"/></svg>';
+  const IC_MUTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M23 9l-6 6M17 9l6 6"/></svg>';
+  function updateBGM(){ if(!bgm)return; sndBtn.innerHTML=bgmMuted?IC_MUTE:IC_SND; bgm.volume=0.55;
+    if(!bgmMuted && userGesture && posterActive && !document.hidden){ bgm.play().catch(()=>{}); } else { bgm.pause(); } }
+  sndBtn.onclick=()=>{ bgmMuted=!bgmMuted; try{localStorage.setItem('clbMuted',bgmMuted?'1':'0');}catch(e){} if(!bgmMuted)userGesture=true; updateBGM(); };
+  document.addEventListener('pointerdown',()=>{ if(!userGesture){userGesture=true; updateBGM();} },{once:true});
+  document.addEventListener('visibilitychange',()=>updateBGM());
+
+  /* ==================== keyboard a11y ==================== */
+  document.getElementById('dk-ov').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();ov.classList.add('open');}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&pdfv.classList.contains('open'))pdfClose();});
+
   /* ==================== init ==================== */
   applyLang();
+  updateBGM();
   if(!fromHash()){/* stay on poster */}
   deckIdle();
   </script>

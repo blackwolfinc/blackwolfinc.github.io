@@ -4,9 +4,9 @@
  */
 'use strict';
 
-const CACHE_NAME = 'clb-v1';
+const CACHE_NAME = 'clb-v2';
 
-/* App shell + icons/QR */
+/* App shell + icons/QR + background music */
 const SHELL = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const SHELL = [
   './assets/ch-powered.svg',
   './assets/icon.svg',
   './assets/visit-qr.svg',
+  './assets/bg-music.mp3',
 ];
 
 /* app/*.webp — 39 screenshots */
