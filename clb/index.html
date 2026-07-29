@@ -308,8 +308,14 @@
     /* ---- a11y & micro-interactions ---- */
     :focus-visible{outline:2px solid var(--brand2);outline-offset:2px;border-radius:6px}
     #dk-label{font-variant-numeric:tabular-nums}
-    body.attracting #dk-label::after{content:" · Auto";color:var(--brand2);font-weight:800}
-    body.attracting #dk-bar{box-shadow:0 0 12px var(--brand2)}
+    body.autoplaying #dk-label::after{content:" · Auto";color:var(--brand2);font-weight:800}
+    #dk-play{position:fixed;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:60;
+      width:44px;height:44px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.86);backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(20,18,45,.12);color:var(--brand)}
+    #dk-play:hover{background:#fff}#dk-play svg{width:20px;height:20px}
+    #dk-prog{position:fixed;top:0;left:0;height:3px;width:0;z-index:70;background:var(--brand2);box-shadow:0 0 10px var(--brand2)}
+    body.mode-poster #dk-play,body.mode-poster #dk-prog{display:none}
+    @media (min-width:900px){#dk-play{width:52px;height:52px}#dk-play svg{width:24px;height:24px}}
     .icard:active,.lcard:active,.geo-card:active,.chan-cards .cc:active,.ov-card:active,.stat-tile:active{transform:scale(.985)}
     @media (prefers-reduced-motion: reduce){
       *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important;scroll-behavior:auto !important}
@@ -353,6 +359,8 @@
     <button class="dk-arw" id="dk-prev" title="Previous" aria-label="Previous step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <button class="dk-arw" id="dk-next" title="Next" aria-label="Next step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div id="dk-ov" role="button" tabindex="0" aria-label="Overview and search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span>Overview</span></div>
+    <button class="dk-play" id="dk-play" aria-label="Play or pause auto-advance" title="Auto-play"></button>
+    <div id="dk-prog"></div>
     <div id="dk-foot"><div id="dk-bar"></div><div id="dk-label"></div></div>
   </section>
 
@@ -609,6 +617,7 @@
     const el=deck.firstElementChild;requestAnimationFrame(()=>el&&el.classList.add('in'));
     if(s.type==='stats')animateStats();
     if(typeof updateHash==='function')updateHash();
+    if(typeof deckSchedule==='function')deckSchedule();
     // wire interactions
     deck.querySelectorAll('[data-jump]').forEach(c=>c.onclick=()=>{const ch=CH.find(x=>{const sec=SECTIONS.find(y=>y.kick===x.name);return sec&&sec.id===c.dataset.jump;});if(ch)deckJump(ch.start);});
     const dev=deck.querySelector('[data-shot]');if(dev)dev.onclick=()=>lbOpen(+dev.dataset.shot);
@@ -661,6 +670,7 @@
     if(posterActive){pPlaying=true;pRestart();wake();}
     else{document.body.classList.remove('pidle');pStop();renderDeck();}
     if(typeof updateBGM==='function')updateBGM();
+    if(typeof deckSchedule==='function')deckSchedule();
   }
   document.querySelectorAll('.ftab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
   function setNav(open){document.body.classList.toggle('nav-open',open);}
@@ -774,12 +784,24 @@
   function fromHash(){const m=(location.hash||'').match(/^#s(\d+)$/);if(m){const i=+m[1];if(i>=0&&i<STEPS.length){if(posterActive)switchTab('app');deckJump(i);return true;}}return false;}
   window.addEventListener('hashchange',()=>{if(!posterActive)fromHash();});
 
-  /* ==================== attract mode + idle reset ==================== */
-  let attractT=null,autoT=null,attracting=false;const IDLE_MS=45000,AUTO_MS=9000;
-  function stopAuto(){attracting=false;document.body.classList.remove('attracting');clearInterval(autoT);autoT=null;}
-  function startAuto(){if(posterActive)return;attracting=true;document.body.classList.add('attracting');autoT=setInterval(()=>{if(document.hidden)return;deckJump(deckIdx>=STEPS.length-1?0:deckIdx+1);},AUTO_MS);}
-  function deckIdle(){clearTimeout(attractT);if(attracting)stopAuto();if(!posterActive)attractT=setTimeout(startAuto,IDLE_MS);}
-  ['pointerdown','keydown','wheel','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{if(attracting)stopAuto();deckIdle();},{passive:true}));
+  /* ==================== deck auto-advance (App slides itself) ==================== */
+  let deckAuto=true,deckTimer=null;const DECK_MS=8500;
+  try{deckAuto=localStorage.getItem('clbDeckAuto')!=='0';}catch(e){}
+  const dkProg=document.getElementById('dk-prog'),dkPlay=document.getElementById('dk-play');
+  const IC_PLAY2='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  const IC_PAUSE2='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+  function modalOpen(){return lb.classList.contains('open')||ov.classList.contains('open')||pdfv.classList.contains('open');}
+  function runProg(){ if(!dkProg)return; dkProg.style.transition='none'; dkProg.style.width='0%';
+    if(deckAuto&&!posterActive&&!modalOpen()){ requestAnimationFrame(()=>{ dkProg.style.transition='width '+DECK_MS+'ms linear'; dkProg.style.width='100%'; }); } }
+  function deckSchedule(){ clearTimeout(deckTimer);
+    if(deckAuto&&!posterActive){ document.body.classList.add('autoplaying'); runProg();
+      deckTimer=setTimeout(function(){ if(document.hidden||modalOpen()){deckSchedule();return;} deckJump(deckIdx>=STEPS.length-1?0:deckIdx+1); },DECK_MS);
+    } else { document.body.classList.remove('autoplaying'); if(dkProg){dkProg.style.transition='none';dkProg.style.width='0%';} }
+  }
+  function deckIdle(){ deckSchedule(); } /* any interaction restarts the per-step timer */
+  ['pointerdown','keydown','wheel','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{ if(!posterActive)deckSchedule(); },{passive:true}));
+  function updatePlay(){ if(dkPlay)dkPlay.innerHTML=deckAuto?IC_PAUSE2:IC_PLAY2; }
+  if(dkPlay)dkPlay.onclick=()=>{ deckAuto=!deckAuto; try{localStorage.setItem('clbDeckAuto',deckAuto?'1':'0');}catch(e){} updatePlay(); deckSchedule(); };
 
   /* ==================== wake lock (keep screen on) ==================== */
   let wakeLock=null;
@@ -830,7 +852,7 @@
     if(!bgmMuted && userGesture && posterActive && !document.hidden){ bgm.play().catch(()=>{}); } else { bgm.pause(); } }
   sndBtn.onclick=()=>{ bgmMuted=!bgmMuted; try{localStorage.setItem('clbMuted',bgmMuted?'1':'0');}catch(e){} if(!bgmMuted)userGesture=true; updateBGM(); };
   document.addEventListener('pointerdown',()=>{ if(!userGesture){userGesture=true; updateBGM();} },{once:true});
-  document.addEventListener('visibilitychange',()=>updateBGM());
+  document.addEventListener('visibilitychange',()=>{updateBGM();if(!document.hidden&&!posterActive)deckSchedule();});
 
   /* ==================== keyboard a11y ==================== */
   document.getElementById('dk-ov').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();ov.classList.add('open');}});
@@ -839,6 +861,7 @@
   /* ==================== init ==================== */
   applyLang();
   updateBGM();
+  updatePlay();
   if(!fromHash()){/* stay on poster */}
   deckIdle();
   </script>
