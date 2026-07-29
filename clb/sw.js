@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'clb-v2';
+const CACHE_NAME = 'clb-v3';
 
 /* App shell + icons/QR + background music */
 const SHELL = [
@@ -142,19 +142,14 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Cache-first, populate on miss.
+  // Stale-while-revalidate: serve cache instantly, refresh in the background.
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(request);
-    if (cached) return cached;
-    try {
-      const fresh = await fetch(request);
-      if (fresh && (fresh.ok || fresh.type === 'opaque')) {
-        cache.put(request, fresh.clone());
-      }
+    const fetching = fetch(request).then((fresh) => {
+      if (fresh && (fresh.ok || fresh.type === 'opaque')) cache.put(request, fresh.clone());
       return fresh;
-    } catch (err) {
-      return Response.error();
-    }
+    }).catch(() => null);
+    return cached || (await fetching) || Response.error();
   })());
 });

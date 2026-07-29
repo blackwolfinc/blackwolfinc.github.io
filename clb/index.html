@@ -95,8 +95,10 @@
     #deck{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
       overflow:auto;touch-action:pan-y;padding:clamp(56px,7vh,84px) clamp(64px,9vw,120px)}
     .step{width:100%;max-width:1120px;margin:auto;opacity:0;transform:translateY(10px);
-      transition:opacity .4s ease,transform .4s ease}
-    .step.in{opacity:1;transform:none}
+      transition:opacity .42s ease,transform .42s cubic-bezier(.4,0,.2,1)}
+    .step.from-r{transform:translateX(36px)}
+    .step.from-l{transform:translateX(-36px)}
+    .step.in{opacity:1;transform:none!important}
 
     /* intro */
     .ch-logo{height:clamp(38px,5.2vh,56px);display:block;margin:0 auto 22px;width:auto;max-width:min(80vw,340px)}
@@ -542,7 +544,7 @@
   /* ==================== RENDER DECK ==================== */
   const deck=document.getElementById('deck'),dkBar=document.getElementById('dk-bar'),dkLabel=document.getElementById('dk-label');
   const dkPrev=document.getElementById('dk-prev'),dkNext=document.getElementById('dk-next');
-  let deckIdx=0;
+  let deckIdx=0,deckDir=1;
 
   function frameHTML(frame,file,alt){
     if(frame==='browser')return '<div class="browser"><div class="b-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="addr">so-clb-so.caritahub.vn</span></div><div class="screen"><img src="app/'+file+'.webp" alt="'+alt+'"></div></div>';
@@ -614,7 +616,8 @@
     const s=STEPS[deckIdx];
     deck.innerHTML=stepHTML(s);
     deck.scrollTop=0;
-    const el=deck.firstElementChild;requestAnimationFrame(()=>el&&el.classList.add('in'));
+    const el=deck.firstElementChild;if(el)el.classList.add(deckDir<0?'from-l':'from-r');requestAnimationFrame(()=>el&&el.classList.add('in'));
+    var nx=STEPS[deckIdx+1];if(nx&&nx.type==='screen'){var im=new Image();im.src='app/'+nx.file+'.webp';}
     if(s.type==='stats')animateStats();
     if(typeof updateHash==='function')updateHash();
     if(typeof deckSchedule==='function')deckSchedule();
@@ -626,8 +629,8 @@
     dkLabel.textContent=s.type==='screen'?(cn(s.chapter,s.chId)+' · '+s.idx+'/'+s.len):cn(s.chapter,s.type==='chapter'?s.sec.id:null);
     dkPrev.disabled=deckIdx===0;dkNext.disabled=deckIdx===STEPS.length-1;
   }
-  function deckGo(d){deckJump(deckIdx+d);}
-  function deckJump(i){deckIdx=Math.max(0,Math.min(STEPS.length-1,i));renderDeck();}
+  function deckGo(d){if(typeof hap==='function')hap();deckJump(deckIdx+d);}
+  function deckJump(i){i=Math.max(0,Math.min(STEPS.length-1,i));deckDir=i<deckIdx?-1:1;deckIdx=i;renderDeck();}
   dkPrev.onclick=()=>deckGo(-1);dkNext.onclick=()=>deckGo(1);
 
   /* swipe on deck */
@@ -785,7 +788,7 @@
   window.addEventListener('hashchange',()=>{if(!posterActive)fromHash();});
 
   /* ==================== deck auto-advance (App slides itself) ==================== */
-  let deckAuto=true,deckTimer=null;const DECK_MS=8500;
+  let deckAuto=true,deckTimer=null,DECK_MS=8500;
   try{deckAuto=localStorage.getItem('clbDeckAuto')!=='0';}catch(e){}
   const dkProg=document.getElementById('dk-prog'),dkPlay=document.getElementById('dk-play');
   const IC_PLAY2='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
@@ -848,11 +851,39 @@
   let userGesture=false;
   const IC_SND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.8 5.5a9 9 0 0 1 0 13"/></svg>';
   const IC_MUTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M23 9l-6 6M17 9l6 6"/></svg>';
-  function updateBGM(){ if(!bgm)return; sndBtn.innerHTML=bgmMuted?IC_MUTE:IC_SND; bgm.volume=0.55;
-    if(!bgmMuted && userGesture && posterActive && !document.hidden){ bgm.play().catch(()=>{}); } else { bgm.pause(); } }
+  let _fadeT=null;
+  function fadeAudio(target){ if(!bgm)return; clearInterval(_fadeT); const step=(target-bgm.volume)/12; let k=0;
+    _fadeT=setInterval(()=>{ k++; bgm.volume=Math.max(0,Math.min(1,bgm.volume+step)); if(k>=12){bgm.volume=Math.max(0,Math.min(1,target)); clearInterval(_fadeT); if(target<=0)bgm.pause();} },40); }
+  function updateBGM(){ if(!bgm)return; sndBtn.innerHTML=bgmMuted?IC_MUTE:IC_SND;
+    const shouldPlay=!bgmMuted&&userGesture&&posterActive&&!document.hidden;
+    if(shouldPlay){ if(bgm.paused){bgm.volume=0;bgm.play().then(()=>fadeAudio(0.55)).catch(()=>{});} else fadeAudio(0.55); }
+    else { if(!bgm.paused)fadeAudio(0); } }
   sndBtn.onclick=()=>{ bgmMuted=!bgmMuted; try{localStorage.setItem('clbMuted',bgmMuted?'1':'0');}catch(e){} if(!bgmMuted)userGesture=true; updateBGM(); };
   document.addEventListener('pointerdown',()=>{ if(!userGesture){userGesture=true; updateBGM();} },{once:true});
   document.addEventListener('visibilitychange',()=>{updateBGM();if(!document.hidden&&!posterActive)deckSchedule();});
+
+  /* ==================== enhancements: haptics, lightbox gestures, idle-home, URL config ==================== */
+  function hap(){try{if(navigator.vibrate)navigator.vibrate(8);}catch(e){}}
+
+  /* lightbox: swipe left/right between shots, swipe down to close */
+  let _lbX=null,_lbY=null;
+  lb.addEventListener('touchstart',e=>{_lbX=e.changedTouches[0].clientX;_lbY=e.changedTouches[0].clientY;},{passive:true});
+  lb.addEventListener('touchend',e=>{if(_lbX==null)return;const dx=e.changedTouches[0].clientX-_lbX,dy=e.changedTouches[0].clientY-_lbY;
+    if(Math.abs(dy)>80&&Math.abs(dy)>Math.abs(dx))lbClose();else if(Math.abs(dx)>45)dx<0?lbGo(1):lbGo(-1);_lbX=null;},{passive:true});
+
+  /* idle → return to the Poster (booth self-reset after 3 min untouched) */
+  let homeT=null;const HOME_MS=180000;
+  function resetHome(){clearTimeout(homeT);homeT=setTimeout(()=>{if(!posterActive){switchTab('poster');deckJump(0);}},HOME_MS);}
+  ['pointerdown','keydown','touchstart','wheel'].forEach(ev=>document.addEventListener(ev,resetHome,{passive:true}));
+
+  /* URL config for per-kiosk setup: ?lang=vi ?tab=app ?auto=0 ?speed=6000 ?kiosk=1 */
+  (function(){var P=new URLSearchParams(location.search);
+    var lg=P.get('lang'); if(lg==='vi'||lg==='en'){LANG=lg;try{localStorage.setItem('clbLang',LANG);}catch(e){}}
+    if(P.get('auto')==='0'){deckAuto=false;try{localStorage.setItem('clbDeckAuto','0');}catch(e){}}
+    var sp=parseInt(P.get('speed'),10); if(sp>=2000&&sp<=60000)DECK_MS=sp;
+    if(P.get('kiosk')==='1'){document.addEventListener('pointerdown',function(){var el=document.documentElement,rf=el.requestFullscreen||el.webkitRequestFullscreen;if(rf)try{rf.call(el);}catch(e){}},{once:true});}
+    if(P.get('tab')==='app'){switchTab('app');}
+  })();
 
   /* ==================== keyboard a11y ==================== */
   document.getElementById('dk-ov').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();ov.classList.add('open');}});
