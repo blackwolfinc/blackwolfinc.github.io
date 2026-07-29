@@ -19,38 +19,57 @@
     html{scroll-behavior:smooth}
     html,body{height:100%}
     body{font-family:var(--font);color:var(--ink);background:var(--bg);
-      -webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+      -webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
+      -webkit-user-select:none;user-select:none;overflow-x:hidden}
     img{-webkit-user-drag:none;user-drag:none}
     a{color:inherit;text-decoration:none}
 
-    /* ============ SLIM TOP BAR ============ */
-    .topbar{position:fixed;top:0;left:0;right:0;height:46px;z-index:60;
-      display:flex;align-items:center;gap:12px;
-      padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));
-      background:rgba(255,255,255,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-      border-bottom:1px solid var(--line);transition:transform .35s ease,opacity .35s ease}
-    .brand{display:flex;align-items:center;gap:7px;font-weight:800;font-size:14.5px;white-space:nowrap}
+    /* ============ TOP OVERLAY (hidden until expanded) ============ */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:80;
+      background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--line);box-shadow:0 8px 30px rgba(20,18,45,.10);
+      transform:translateY(-110%);transition:transform .34s cubic-bezier(.4,0,.2,1)}
+    body.nav-open .topbar{transform:translateY(0)}
+    .tbrow{height:50px;display:flex;align-items:center;gap:12px;
+      padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left))}
+    .brand{display:flex;align-items:center;gap:7px;font-weight:800;font-size:15px;white-space:nowrap}
     .brand b{color:var(--brand2)}
-    .brand .dot{color:var(--muted);font-weight:600;font-size:11.5px;display:none}
-    @media(min-width:680px){.brand .dot{display:inline}}
-    .tabs{display:flex;gap:3px;background:#eae4d7;border-radius:999px;padding:3px;margin:0 auto}
-    .tab{appearance:none;border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;
-      color:var(--muted);padding:5px 16px;border-radius:999px;transition:.2s;white-space:nowrap}
-    .tab.active{background:#fff;color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+    .brand .dot{color:var(--muted);font-weight:600;font-size:11.5px}
+    .tbrow .spacer{flex:1}
     .iconbtn{appearance:none;border:1px solid var(--line);background:#fff;cursor:pointer;
-      width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-      color:var(--ink);flex:0 0 auto}
-    .iconbtn:hover{background:#faf8f2}
-    .iconbtn svg{width:17px;height:17px}
+      width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--ink);flex:0 0 auto}
+    .iconbtn:hover{background:#faf8f2}.iconbtn svg{width:18px;height:18px}
+    /* channel nav inside overlay (app only) */
+    .subnav{display:flex;gap:6px;overflow-x:auto;padding:8px 14px;border-top:1px solid var(--line);scrollbar-width:none}
+    .subnav::-webkit-scrollbar{display:none}
+    .subnav a{font-size:12.5px;font-weight:700;color:var(--muted);padding:6px 12px;border-radius:999px;white-space:nowrap;transition:.15s}
+    .subnav a:hover{background:#f0ece2;color:var(--brand)}
+    body.mode-poster .subnav{display:none}
+
+    /* ============ BOTTOM FLOATING NAV ============ */
+    .fab{position:fixed;left:50%;transform:translateX(-50%);
+      bottom:max(16px,calc(env(safe-area-inset-bottom) + 10px));z-index:90;
+      display:flex;align-items:center;gap:3px;padding:5px;border-radius:999px;
+      background:rgba(22,20,42,.52);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,.22);box-shadow:0 10px 34px rgba(0,0,0,.32);
+      transition:opacity .35s ease}
+    .fab .ftab{appearance:none;border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:13.5px;
+      color:rgba(255,255,255,.86);padding:8px 20px;border-radius:999px;transition:.2s;white-space:nowrap}
+    .fab .ftab.active{background:#fff;color:var(--brand)}
+    .fab .fdiv{width:1px;height:20px;background:rgba(255,255,255,.24);margin:0 2px}
+    .fab .fexp{appearance:none;border:0;cursor:pointer;background:transparent;color:#fff;
+      width:38px;height:38px;border-radius:999px;display:flex;align-items:center;justify-content:center}
+    .fab .fexp:hover{background:rgba(255,255,255,.16)}
+    .fab .fexp svg{width:20px;height:20px;transition:transform .3s}
+    body.nav-open .fab .fexp svg{transform:rotate(180deg)}
+    body.pidle.mode-poster .fab{opacity:.28}
 
     .view{display:none}.view.active{display:block}
 
     /* ---------- POSTER ---------- */
-    #stage{position:fixed;inset:46px 0 0 0;z-index:10;overflow:hidden;
+    #stage{position:fixed;inset:0;z-index:10;overflow:hidden;cursor:pointer;
       background:radial-gradient(120% 80% at 50% 0%,#2e2a6e 0%,#15123a 45%,#0d0b28 100%);
       display:flex;align-items:center;justify-content:center}
-    body.pfull #stage{inset:0}
-    body.pfull .topbar{transform:translateY(-100%);opacity:0;pointer-events:none}
     .slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;
       transition:opacity calc(var(--fade-ms)*1ms) ease-in-out;pointer-events:none;padding:clamp(8px,2.5vmin,40px)}
     .slide.active{opacity:1}
@@ -58,173 +77,131 @@
       border-radius:clamp(4px,1.2vmin,14px);box-shadow:0 30px 80px rgba(0,0,0,.55)}
     #bar{position:absolute;top:0;left:0;height:4px;width:0;z-index:20;
       background:linear-gradient(90deg,#7c78ff,#b9a6ff);box-shadow:0 0 12px rgba(124,120,255,.6)}
-    #dots{position:absolute;bottom:max(18px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+    #dots{position:absolute;bottom:max(78px,calc(env(safe-area-inset-bottom) + 72px));left:50%;transform:translateX(-50%);
       display:flex;gap:10px;z-index:20;transition:opacity .4s}
     .dot{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:.3s}
     .dot.active{background:#fff;transform:scale(1.25)}
-    #pctrl{position:absolute;top:12px;right:14px;z-index:20;display:flex;gap:10px;transition:opacity .4s}
-    .pbtn{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-      background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;backdrop-filter:blur(8px)}
-    .pbtn svg{width:22px;height:22px}
-    .navzone{position:absolute;top:0;bottom:0;width:20%;z-index:15;cursor:pointer}
-    #pv-prev{left:0}#pv-next{right:0}
-    body.pidle #dots,body.pidle #pctrl{opacity:0;pointer-events:none}
-    body.pidle.pfull .topbar{opacity:0}
+    body.pidle #dots{opacity:0;pointer-events:none}
+    /* hold-to-pause hint */
+    #holdhint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:25;
+      display:flex;align-items:center;gap:10px;padding:12px 20px;border-radius:14px;
+      background:rgba(10,8,26,.62);backdrop-filter:blur(6px);color:#fff;font-weight:700;font-size:15px;
+      opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+    body.holding #holdhint{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    #holdhint svg{width:18px;height:18px}
 
-    /* ---------- APP: channel nav ---------- */
-    #view-app{padding-top:46px}
-    .subnav{position:sticky;top:46px;z-index:50;background:rgba(255,255,255,.9);
-      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
-      display:flex;gap:6px;overflow-x:auto;padding:8px 14px;scrollbar-width:none}
-    .subnav::-webkit-scrollbar{display:none}
-    .subnav a{font-size:12.5px;font-weight:700;color:var(--muted);padding:6px 12px;border-radius:999px;
-      white-space:nowrap;transition:.15s}
-    .subnav a:hover{background:#f0ece2;color:var(--brand)}
-
-    /* ---------- APP: hero ---------- */
-    .hero{max-width:1140px;margin:0 auto;padding:46px 22px 6px;text-align:center}
+    /* ---------- APP ---------- */
+    #view-app{padding:14px 0 96px}
+    .hero{max-width:1140px;margin:0 auto;padding:40px 22px 6px;text-align:center}
     .hero .eyebrow{font-size:12.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand2)}
     .hero h1{font-size:clamp(28px,5vw,50px);color:var(--brand);letter-spacing:-.025em;line-height:1.05;margin-top:12px}
     .hero p{margin:16px auto 0;max-width:680px;color:#4b5563;font-size:clamp(15px,2vw,17.5px);line-height:1.6}
-    .index{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-      max-width:1000px;margin:30px auto 0;text-align:left}
-    .icard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 18px;
-      transition:.18s;cursor:pointer;position:relative;overflow:hidden}
+    .index{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));max-width:1000px;margin:30px auto 0;text-align:left}
+    .icard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 18px;transition:.18s;cursor:pointer;position:relative;overflow:hidden}
     .icard:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(30,27,75,.12);border-color:#d8d2c4}
-    .icard .no{font-size:12px;font-weight:800;color:#fff;background:var(--accent);
-      width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .icard .no{font-size:12px;font-weight:800;color:#fff;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center}
     .icard h3{font-size:15px;margin:12px 0 4px;color:var(--ink)}
     .icard span{font-size:12.5px;color:var(--muted);line-height:1.4}
 
-    /* ---------- APP: channel sections ---------- */
     .section{max-width:1140px;margin:0 auto;padding:60px 22px 0}
     .sec-top{position:relative;margin-bottom:26px}
-    .sec-no{position:absolute;right:0;top:-18px;font-size:clamp(60px,12vw,120px);font-weight:900;
-      color:var(--brand);opacity:.05;line-height:1;pointer-events:none;z-index:0}
+    .sec-no{position:absolute;right:0;top:-18px;font-size:clamp(60px,12vw,120px);font-weight:900;color:var(--brand);opacity:.05;line-height:1;pointer-events:none;z-index:0}
     .kick{display:inline-flex;align-items:center;gap:8px;position:relative;z-index:1}
     .kick i{width:9px;height:9px;border-radius:50%;background:var(--ch,#4b47c9)}
     .kick span{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ch,#4b47c9)}
-    .sec-top h2{font-size:clamp(22px,3.4vw,32px);color:var(--ink);letter-spacing:-.02em;margin:12px 0 0;
-      max-width:820px;position:relative;z-index:1;line-height:1.15}
-    .badge{display:inline-block;font-size:11.5px;font-weight:800;padding:4px 11px;border-radius:999px;margin-top:14px;
-      vertical-align:middle}
-    .badge.live{background:#dcfce7;color:#15803d}
-    .badge.proto{background:#fef3c7;color:#b45309}
+    .sec-top h2{font-size:clamp(22px,3.4vw,32px);color:var(--ink);letter-spacing:-.02em;margin:12px 0 0;max-width:820px;position:relative;z-index:1;line-height:1.15}
+    .badge{display:inline-block;font-size:11.5px;font-weight:800;padding:4px 11px;border-radius:999px;margin-top:14px;vertical-align:middle}
+    .badge.live{background:#dcfce7;color:#15803d}.badge.proto{background:#fef3c7;color:#b45309}
     .sec-top p.blurb{margin:14px 0 0;max-width:760px;color:#4b5563;font-size:15px;line-height:1.62;position:relative;z-index:1}
     .feats{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;position:relative;z-index:1}
-    .feats li{list-style:none;font-size:12.5px;font-weight:600;color:#374151;background:#fff;
-      border:1px solid var(--line);border-radius:999px;padding:6px 13px;display:flex;align-items:center;gap:7px}
+    .feats li{list-style:none;font-size:12.5px;font-weight:600;color:#374151;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 13px;display:flex;align-items:center;gap:7px}
     .feats li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ch,#4b47c9)}
-    .manual{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-weight:700;font-size:13.5px;
-      color:var(--brand2);background:#eef3ff;border:1px solid #dbe6ff;padding:9px 15px;border-radius:11px;
-      position:relative;z-index:1;transition:.15s}
+    .manual{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-weight:700;font-size:13.5px;color:var(--brand2);background:#eef3ff;border:1px solid #dbe6ff;padding:9px 15px;border-radius:11px;position:relative;z-index:1;transition:.15s}
     .manual:hover{background:#e2ecff}
-
     .grid-phones{display:grid;gap:28px 20px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-top:32px}
     .grid-wide{display:grid;gap:32px 26px;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));margin-top:32px}
-
     figure{margin:0;cursor:zoom-in}
     figcap{margin-top:12px;font-size:13px;color:#4b5563;line-height:1.5}
-
-    .phone{width:100%;max-width:250px;margin:0 auto;background:#101114;border-radius:30px;padding:9px;
-      box-shadow:0 18px 40px rgba(20,18,45,.18);position:relative}
-    .phone::before{content:"";position:absolute;top:16px;left:50%;transform:translateX(-50%);
-      width:34%;height:6px;background:#26282e;border-radius:99px;z-index:2}
+    .phone{width:100%;max-width:250px;margin:0 auto;background:#101114;border-radius:30px;padding:9px;box-shadow:0 18px 40px rgba(20,18,45,.18);position:relative}
+    .phone::before{content:"";position:absolute;top:16px;left:50%;transform:translateX(-50%);width:34%;height:6px;background:#26282e;border-radius:99px;z-index:2}
     .phone .screen{border-radius:23px;overflow:hidden;aspect-ratio:640/1385;background:#fff;display:block}
     .phone .screen img{width:100%;height:100%;object-fit:cover;display:block}
-
-    .browser{background:#fff;border-radius:13px;overflow:hidden;border:1px solid var(--line);
-      box-shadow:0 18px 44px rgba(20,18,45,.16)}
-    .browser .b-bar{height:34px;display:flex;align-items:center;gap:7px;padding:0 13px;
-      background:#f4f1ea;border-bottom:1px solid var(--line)}
+    .browser{background:#fff;border-radius:13px;overflow:hidden;border:1px solid var(--line);box-shadow:0 18px 44px rgba(20,18,45,.16)}
+    .browser .b-bar{height:34px;display:flex;align-items:center;gap:7px;padding:0 13px;background:#f4f1ea;border-bottom:1px solid var(--line)}
     .browser .b-bar i{width:11px;height:11px;border-radius:50%;display:block}
     .browser .b-bar .r{background:#ff5f57}.browser .b-bar .y{background:#febc2e}.browser .b-bar .g{background:#28c840}
-    .browser .b-bar .addr{flex:1;height:19px;margin-left:8px;background:#fff;border:1px solid #e3ded3;border-radius:6px;
-      font-size:11px;color:#9aa0ab;display:flex;align-items:center;padding:0 9px;overflow:hidden;white-space:nowrap}
+    .browser .b-bar .addr{flex:1;height:19px;margin-left:8px;background:#fff;border:1px solid #e3ded3;border-radius:6px;font-size:11px;color:#9aa0ab;display:flex;align-items:center;padding:0 9px;overflow:hidden;white-space:nowrap}
     .browser .screen{aspect-ratio:1600/1000;background:#fff;display:block}
     .browser .screen img{width:100%;height:100%;object-fit:cover;display:block}
-
     .kiosk{background:#14161c;border-radius:20px;padding:14px;box-shadow:0 20px 46px rgba(20,18,45,.22)}
     .kiosk .screen{border-radius:8px;overflow:hidden;aspect-ratio:1600/1000;background:#fff;display:block}
     .kiosk .screen img{width:100%;height:100%;object-fit:cover;display:block}
     .kiosk .stand{width:70px;height:10px;background:#14161c;border-radius:0 0 8px 8px;margin:0 auto}
-
-    /* sub-block (family digest) */
     .subblock{margin-top:44px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}
     .subblock h3{font-size:19px;color:var(--ink);display:inline-block}
     .subblock .note{color:#4b5563;font-size:14px;line-height:1.6;margin:12px 0 0;max-width:720px}
     .subblock .grid-phones{margin-top:22px}
-
-    /* ---------- Print / Manuals link cards ---------- */
     .linkgrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));margin-top:30px}
     .lcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;transition:.18s;display:block}
     .lcard:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(30,27,75,.1);border-color:#d8d2c4}
-    .lcard .tag{font-size:11px;font-weight:800;letter-spacing:.06em;color:#b45309;background:#fef3c7;
-      display:inline-block;padding:3px 9px;border-radius:6px}
+    .lcard .tag{font-size:11px;font-weight:800;letter-spacing:.06em;color:#b45309;background:#fef3c7;display:inline-block;padding:3px 9px;border-radius:6px}
     .lcard h4{font-size:15.5px;margin:12px 0 5px;color:var(--ink)}
     .lcard p{font-size:12.5px;color:var(--muted);line-height:1.45}
-
-    /* ---------- Principles ---------- */
     .princ{max-width:1140px;margin:70px auto 0;padding:0 22px}
     .princ h2{font-size:clamp(20px,3vw,28px);color:var(--brand);text-align:center;letter-spacing:-.02em}
     .plist{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:26px}
     .pitem{background:#fbf9f4;border:1px solid var(--line);border-radius:14px;padding:20px}
     .pitem b{display:block;color:var(--brand2);font-size:14.5px;margin-bottom:6px}
     .pitem span{font-size:13px;color:#4b5563;line-height:1.55}
-
-    /* ---------- Footer ---------- */
-    .foot{max-width:1140px;margin:64px auto 0;padding:30px 22px 60px;border-top:1px solid var(--line);text-align:center}
-    .foot .flogo{font-weight:800;font-size:16px;color:var(--brand)}
-    .foot .flogo b{color:var(--brand2)}
+    .foot{max-width:1140px;margin:64px auto 0;padding:30px 22px 20px;border-top:1px solid var(--line);text-align:center}
+    .foot .flogo{font-weight:800;font-size:16px;color:var(--brand)}.foot .flogo b{color:var(--brand2)}
     .foot .demo{color:var(--muted);font-size:13px;margin-top:8px}
     .foot .flinks{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
-    .foot .flinks a{font-size:13px;font-weight:700;color:var(--brand2);background:#eef3ff;border:1px solid #dbe6ff;
-      padding:8px 15px;border-radius:10px;transition:.15s}
+    .foot .flinks a{font-size:13px;font-weight:700;color:var(--brand2);background:#eef3ff;border:1px solid #dbe6ff;padding:8px 15px;border-radius:10px;transition:.15s}
     .foot .flinks a:hover{background:#e2ecff}
     .foot .fine{color:#9aa0ab;font-size:12px;margin-top:20px;line-height:1.6;max-width:640px;margin-left:auto;margin-right:auto}
 
     /* ---------- Lightbox ---------- */
-    #lb{position:fixed;inset:0;z-index:100;background:rgba(15,13,30,.93);display:none;align-items:center;justify-content:center;padding:22px}
+    #lb{position:fixed;inset:0;z-index:120;background:rgba(15,13,30,.93);display:none;align-items:center;justify-content:center;padding:22px}
     #lb.open{display:flex}
     #lb .box{max-width:min(1200px,96vw);max-height:92vh;display:flex;flex-direction:column;align-items:center;gap:14px}
     #lb img{max-width:100%;max-height:84vh;object-fit:contain;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
     #lb .cap{color:#fff;text-align:center;max-width:680px;font-size:14px;line-height:1.5}
-    #lb .x{position:absolute;top:14px;right:16px;color:#fff;font-size:30px;cursor:pointer;width:46px;height:46px;
-      display:flex;align-items:center;justify-content:center;border-radius:12px}
+    #lb .x{position:absolute;top:14px;right:16px;color:#fff;font-size:30px;cursor:pointer;width:46px;height:46px;display:flex;align-items:center;justify-content:center;border-radius:12px}
     #lb .x:hover{background:rgba(255,255,255,.12)}
-    #lb .arw{position:absolute;top:50%;transform:translateY(-50%);color:#fff;cursor:pointer;width:54px;height:54px;
-      display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border-radius:50%;font-size:26px;user-select:none}
+    #lb .arw{position:absolute;top:50%;transform:translateY(-50%);color:#fff;cursor:pointer;width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border-radius:50%;font-size:26px;user-select:none}
     #lb .arw:hover{background:rgba(255,255,255,.22)}
     #lb .prev{left:16px}#lb .next{right:16px}
     @media(max-width:640px){#lb .arw{width:44px;height:44px}}
   </style>
 </head>
-<body>
+<body class="mode-poster">
+  <!-- ===== TOP OVERLAY (revealed by the floating nav) ===== -->
   <header class="topbar">
-    <div class="brand"><span>Sổ <b>CLB</b> số</span><span class="dot">· CaritaHub</span></div>
-    <div class="tabs">
-      <button class="tab active" data-tab="poster">Poster</button>
-      <button class="tab" data-tab="app">App</button>
+    <div class="tbrow">
+      <div class="brand"><span>Sổ <b>CLB</b> số</span><span class="dot">· CaritaHub</span></div>
+      <div class="spacer"></div>
+      <button class="iconbtn" id="fsBtn" title="Fullscreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+      <button class="iconbtn" id="closeNav" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
     </div>
-    <button class="iconbtn" id="fsBtn" title="Fullscreen">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-    </button>
+    <nav class="subnav" id="subnav"></nav>
   </header>
 
-  <!-- ===================== POSTER ===================== -->
+  <!-- ===== POSTER ===== -->
   <section class="view active" id="view-poster">
     <div id="stage">
-      <div class="navzone" id="pv-prev"></div>
-      <div class="navzone" id="pv-next"></div>
       <div id="bar"></div>
-      <div id="pctrl"><div class="pbtn" id="playBtn"></div></div>
+      <div id="holdhint"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg><span>Paused</span></div>
       <div id="dots"></div>
     </div>
   </section>
 
-  <!-- ===================== APP ===================== -->
+  <!-- ===== APP ===== -->
   <section class="view" id="view-app">
-    <nav class="subnav" id="subnav"></nav>
     <div class="hero">
       <div class="eyebrow">Intergenerational self-help clubs · Adult day care</div>
       <h1>One senior, two services,<br>one record.</h1>
@@ -232,8 +209,6 @@
       <div class="index" id="index"></div>
     </div>
     <div id="sections"></div>
-
-    <!-- Principles -->
     <div class="princ">
       <h2>Five channels, one data discipline</h2>
       <div class="plist">
@@ -243,8 +218,6 @@
         <div class="pitem"><b>One door into the data</b><span>Apps go through the gateway with per-user sessions — access is always decided by the core system; the gateway adds surface, not authority.</span></div>
       </div>
     </div>
-
-    <!-- Footer -->
     <div class="foot">
       <div class="flogo">Sổ <b>CLB</b> số · CaritaHub</div>
       <div class="demo">powered by Weeswares · Demo: Vietnam Medi-Pharm Expo, 30 Jul – 1 Aug 2026</div>
@@ -256,7 +229,17 @@
     </div>
   </section>
 
-  <!-- ===================== LIGHTBOX ===================== -->
+  <!-- ===== FLOATING BOTTOM NAV ===== -->
+  <div class="fab" id="fab">
+    <button class="ftab active" data-tab="poster">Poster</button>
+    <button class="ftab" data-tab="app">App</button>
+    <span class="fdiv"></span>
+    <button class="fexp" id="fexp" title="More">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+    </button>
+  </div>
+
+  <!-- ===== LIGHTBOX ===== -->
   <div id="lb">
     <div class="x" id="lb-x">&times;</div>
     <div class="arw prev" id="lb-prev">&#8249;</div>
@@ -267,41 +250,50 @@
   <script>
   /* ==================== POSTER SLIDESHOW ==================== */
   const POSTERS=["posters/1.jpg","posters/2.jpg","posters/3.jpg","posters/4.jpg","posters/5.jpg"];
-  const stage=document.getElementById('stage'),dotsWrap=document.getElementById('dots'),
-        bar=document.getElementById('bar'),playBtn=document.getElementById('playBtn');
+  const stage=document.getElementById('stage'),dotsWrap=document.getElementById('dots'),bar=document.getElementById('bar');
   const SLIDE_MS=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slide-seconds'))||8)*1000;
-  const IC_PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-  const IC_PAUSE='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
-  let pIdx=0,pPlaying=true,pTimer=null,pStart=0,pRAF=null,posterActive=true;
+  let pIdx=0,pPlaying=true,pTimer=null,pStart=0,pRAF=null,posterActive=true,pHold=false;
+
   const slides=POSTERS.map((src,i)=>{
     const w=document.createElement('div');w.className='slide';
     const img=new Image();img.src=src;img.alt='Poster '+(i+1);img.loading=i===0?'eager':'lazy';
     w.appendChild(img);stage.insertBefore(w,bar);
-    const d=document.createElement('div');d.className='dot';d.onclick=()=>pGo(i);dotsWrap.appendChild(d);return w;});
+    const d=document.createElement('div');d.className='dot';d.onclick=ev=>{ev.stopPropagation();pGo(i);};dotsWrap.appendChild(d);return w;});
   const dots=[...dotsWrap.children];
   function pRender(){slides.forEach((s,i)=>s.classList.toggle('active',i===pIdx));dots.forEach((d,i)=>d.classList.toggle('active',i===pIdx));}
   function pGo(i){pIdx=(i+slides.length)%slides.length;pRender();pRestart();}
   const pNext=()=>pGo(pIdx+1),pPrev=()=>pGo(pIdx-1);
-  function pTick(){if(!pPlaying||!posterActive)return;const pct=Math.min(100,((performance.now()-pStart)/SLIDE_MS)*100);
-    bar.style.width=pct+'%';pRAF=requestAnimationFrame(pTick);}
+  function pTick(){if(!pPlaying||!posterActive||pHold)return;const pct=Math.min(100,((performance.now()-pStart)/SLIDE_MS)*100);bar.style.width=pct+'%';pRAF=requestAnimationFrame(pTick);}
   function pRestart(){clearTimeout(pTimer);cancelAnimationFrame(pRAF);bar.style.width='0%';
-    if(!pPlaying||!posterActive)return;pStart=performance.now();pRAF=requestAnimationFrame(pTick);pTimer=setTimeout(pNext,SLIDE_MS);}
-  function pSet(v){pPlaying=v;playBtn.innerHTML=v?IC_PAUSE:IC_PLAY;if(v)pRestart();else{clearTimeout(pTimer);cancelAnimationFrame(pRAF);}}
-  playBtn.onclick=()=>pSet(!pPlaying);
-  document.getElementById('pv-next').onclick=pNext;document.getElementById('pv-prev').onclick=pPrev;
-  let tX=null;
-  stage.addEventListener('touchstart',e=>tX=e.changedTouches[0].clientX,{passive:true});
-  stage.addEventListener('touchend',e=>{if(tX==null)return;const dx=e.changedTouches[0].clientX-tX;if(Math.abs(dx)>40)dx<0?pNext():pPrev();tX=null;},{passive:true});
-  playBtn.innerHTML=IC_PAUSE;pRender();pRestart();
-  let idleT;function wake(){document.body.classList.remove('pidle');clearTimeout(idleT);
-    idleT=setTimeout(()=>{if(posterActive)document.body.classList.add('pidle')},3500);}
-  ['mousemove','touchstart','keydown','click'].forEach(ev=>document.addEventListener(ev,wake,{passive:true}));wake();
+    if(!pPlaying||!posterActive||pHold)return;pStart=performance.now();pRAF=requestAnimationFrame(pTick);pTimer=setTimeout(pNext,SLIDE_MS);}
+  function pStop(){clearTimeout(pTimer);cancelAnimationFrame(pRAF);}
+
+  /* ---- press-and-hold to pause, release to resume ---- */
+  function holdStart(){if(!posterActive||pHold)return;pHold=true;pStop();document.body.classList.add('holding');}
+  function holdEnd(){if(!pHold)return;pHold=false;document.body.classList.remove('holding');if(pPlaying&&posterActive)pRestart();}
+
+  /* ---- gestures: hold=pause · quick tap edges=prev/next · swipe=prev/next ---- */
+  let gX=0,gT=0,gMoved=false,gId=null;
+  stage.addEventListener('pointerdown',e=>{if(!posterActive)return;gId=e.pointerId;gX=e.clientX;gT=performance.now();gMoved=false;holdStart();});
+  stage.addEventListener('pointermove',e=>{if(gId===null)return;if(Math.abs(e.clientX-gX)>10)gMoved=true;});
+  function endGesture(e){
+    if(gId===null)return;gId=null;const dt=performance.now()-gT,dx=(e.clientX||gX)-gX;holdEnd();
+    if(gMoved&&Math.abs(dx)>45){dx<0?pNext():pPrev();return;}
+    if(dt<260&&!gMoved){const w=innerWidth;if(e.clientX<w*0.32)pPrev();else if(e.clientX>w*0.68)pNext();}
+  }
+  stage.addEventListener('pointerup',endGesture);
+  stage.addEventListener('pointercancel',()=>{gId=null;holdEnd();});
+  stage.addEventListener('pointerleave',e=>{if(gId!==null){gId=null;holdEnd();}});
+
+  pRender();pRestart();
+  /* idle auto-dim */
+  let idleT;function wake(){document.body.classList.remove('pidle');clearTimeout(idleT);idleT=setTimeout(()=>{if(posterActive&&!pHold)document.body.classList.add('pidle')},3500);}
+  ['mousemove','touchstart','keydown','click','pointerdown'].forEach(ev=>document.addEventListener(ev,wake,{passive:true}));wake();
 
   /* ==================== APP DATA ==================== */
   const PDF='https://regardlessly.github.io/notes/vietnam-channels/assets/';
   const SECTIONS=[
-    {id:'backend',no:'01',kick:'Back office',ch:'#4b47c9',frame:'browser',
-     badge:{t:'Live demo',c:'live'},
+    {id:'backend',no:'01',kick:'Back office',ch:'#4b47c9',frame:'browser',badge:{t:'Live demo',c:'live'},
      title:'The Odoo back office — where both services run',
      blurb:'One operator — Chị Hoa, the club secretary — runs both the club and the day-care centre from the same screen: members, self-generating schedules, whole-session vitals, the needs-attention inbox, care plans and visits, the day board, and printable books. The rule throughout: the system prompts, people decide — never a diagnosis.',
      feats:['70 members, hardship categories, health insurance','Self-generating schedules','60 seniors’ vitals in 40 minutes','Attention levels, never diagnosis','Day-care day board','Safety instructions for staff','Province: aggregates only'],
@@ -320,8 +312,7 @@
       ['12-enrolment-safety','The red safety band says what staff must do — never what a person has; with the family tab of who may collect.'],
       ['13-centre-kpis','Centre numbers: regulars, visits per 30 days, coverage (illustrative figures).'],
      ]},
-    {id:'staff',no:'02',kick:'Staff & volunteers',ch:'#159a6b',frame:'phone',
-     badge:{t:'Prototype — in build',c:'proto'},
+    {id:'staff',no:'02',kick:'Staff & volunteers',ch:'#159a6b',frame:'phone',badge:{t:'Prototype — in build',c:'proto'},
      title:'The staff & volunteer app',
      blurb:'The session’s work, pocket-sized: two-tap attendance, blood pressure and weight entered on the spot, the needs-attention list, and a 30-second visit sheet for volunteers. A volunteer sees only their assigned care plans — nothing more.',
      feats:['Two-tap attendance','Vitals at the session','30-second visit sheet','Volunteers see only their own work','Book preview & PDF export'],
@@ -336,8 +327,7 @@
       ['books','The club books, right in the app.'],
       ['book-preview','Member-book preview with PDF export — it still prints.'],
      ]},
-    {id:'station',no:'03',kick:'Meeting station',ch:'#2f6df6',frame:'kiosk',
-     badge:{t:'Prototype — in build',c:'proto'},
+    {id:'station',no:'03',kick:'Meeting station',ch:'#2f6df6',frame:'kiosk',badge:{t:'Prototype — in build',c:'proto'},
      title:'The club meeting station — a docked tablet at the meeting table',
      blurb:'The staff app’s station mode — but the users are the seniors themselves. Tap your name (or show the member QR), then mark your own attendance, take a device-assisted reading, and sign up for the next session. Every reading lands in the health book and prints as a take-home slip. After 45 idle seconds it resets so nothing personal lingers.',
      feats:['Tap your name or scan a QR','Big type, proper honorifics','Device-assisted readings','Printed take-home slip','45-second privacy reset','PIN-locked station mode'],
@@ -348,8 +338,7 @@
       ['station-hub','Hello Ông An: three tasks, three big targets — attendance, health reading, sign-up.'],
       ['station-measure','The paired cuff and scale read automatically — readings land in the health book and print as a take-home slip; the demo build uses a clearly-labelled simulator.'],
      ]},
-    {id:'family',no:'04',kick:'Family',ch:'#3b6fe0',frame:'phone',
-     badge:{t:'Prototype',c:'proto'},
+    {id:'family',no:'04',kick:'Family',ch:'#3b6fe0',frame:'phone',badge:{t:'Prototype',c:'proto'},
      title:'The family app — reassurance first, detail second',
      blurb:'Built for children living far away. The first thing shown is the thing that matters — Mum is doing well — then the day’s moments. Family surfaces carry no vitals and no health data: the family sees activity and mood, never blood pressure. Sharing opens only with consent on file — consent is a record, not a checkbox.',
      feats:['Reassurance first','No health data','Consent-gated','A quiet day is still good news'],
@@ -364,8 +353,7 @@
      sub:{title:'The daily digest — no login needed',badge:{t:'Live on the gateway',c:'live'},
        note:'No app install required: the centre sends a link (or QR code) over Zalo. Staff tap — the family sees — the book still prints. Links expire after seven days, are family-only, and are refused outright without family-sharing consent on file (the API returns 403). Withdrawing consent also kills links already shared.',
        items:[['family-digest','Bà Trần Thị Lan’s day: arrival time, lunch, nap — no health data.']]}},
-    {id:'senior',no:'05',kick:'Senior',ch:'#0d9488',frame:'phone',
-     badge:{t:'Prototype — always optional',c:'proto'},
+    {id:'senior',no:'05',kick:'Senior',ch:'#0d9488',frame:'phone',badge:{t:'Prototype — always optional',c:'proto'},
      title:'The senior app — a companion, never a requirement',
      blurb:'The club runs perfectly well without the senior ever touching a phone — this app is only for those who want it. Big type, few tasks, each one obvious: a one-tap “I will come”, their own numbers (exactly as in the club’s paper book), and messages from the club. Linking is a six-digit code the club leader reads out at a session — no passwords.',
      feats:['One-tap “I will come”','Their own numbers, same as the paper book','Six-digit link code, no passwords','Optional — the club works without it'],
@@ -378,7 +366,6 @@
       ['link','Linking with a six-digit code the club leader reads out — no passwords, always optional.'],
      ]},
   ];
-
   const PRINT=[
     ['Sổ thành viên','The member book — hardship categories and BHYT','screenshots/print/so-thanh-vien.pdf'],
     ['Sổ theo dõi sức khỏe','The health book — BP and weight across the months','screenshots/print/so-theo-doi-suc-khoe.pdf'],
@@ -398,74 +385,44 @@
   const secWrap=document.getElementById('sections');
   const subnav=document.getElementById('subnav');
   const indexWrap=document.getElementById('index');
-
-  subnav.insertAdjacentHTML('beforeend','<a href="#top" style="font-weight:800;color:var(--brand)">Sổ CLB số</a>');
+  subnav.insertAdjacentHTML('beforeend','<a href="#top" style="font-weight:800;color:var(--brand)">Top</a>');
 
   function frameHTML(frame,file,title){
     if(frame==='browser')
-      return '<div class="browser"><div class="b-bar"><i class="r"></i><i class="y"></i><i class="g"></i>'+
-        '<span class="addr">so-clb-so.caritahub.vn</span></div>'+
-        '<div class="screen"><img loading="lazy" src="app/'+file+'.jpg" alt="'+title+'"></div></div>';
+      return '<div class="browser"><div class="b-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="addr">so-clb-so.caritahub.vn</span></div><div class="screen"><img loading="lazy" src="app/'+file+'.jpg" alt="'+title+'"></div></div>';
     if(frame==='kiosk')
       return '<div class="kiosk"><div class="screen"><img loading="lazy" src="app/'+file+'.jpg" alt="'+title+'"></div></div><div class="stand"></div>';
     return '<div class="phone"><div class="screen"><img loading="lazy" src="app/'+file+'.jpg" alt="'+title+'"></div></div>';
   }
   function renderItems(list,frame,gridClass){
     const grid=document.createElement('div');grid.className=gridClass;
-    list.forEach(([file,cap])=>{
-      const gi=flat.length;flat.push({file:'app/'+file+'.jpg',cap});
+    list.forEach(([file,cap])=>{const gi=flat.length;flat.push({file:'app/'+file+'.jpg',cap});
       const fig=document.createElement('figure');fig.dataset.i=gi;
-      fig.innerHTML=frameHTML(frame,file,cap)+'<figcap>'+cap+'</figcap>';
-      fig.onclick=()=>lbOpen(gi);grid.appendChild(fig);
-    });
+      fig.innerHTML=frameHTML(frame,file,cap)+'<figcap>'+cap+'</figcap>';fig.onclick=()=>lbOpen(gi);grid.appendChild(fig);});
     return grid;
   }
-
   SECTIONS.forEach(sec=>{
-    // sub-nav + index card
     subnav.insertAdjacentHTML('beforeend','<a href="#'+sec.id+'">'+sec.kick+'</a>');
     const ic=document.createElement('a');ic.className='icard';ic.href='#'+sec.id;
-    ic.innerHTML='<div class="no" style="background:'+sec.ch+'">'+sec.no+'</div>'+
-      '<h3>'+sec.kick+'</h3><span>'+sec.items[0][1].split('—')[0].split(':')[0].slice(0,60)+'</span>';
+    ic.innerHTML='<div class="no" style="background:'+sec.ch+'">'+sec.no+'</div><h3>'+sec.kick+'</h3><span>'+sec.items[0][1].split('—')[0].split(':')[0].slice(0,60)+'</span>';
     indexWrap.appendChild(ic);
-
-    // section
     const s=document.createElement('section');s.className='section';s.id=sec.id;s.style.setProperty('--ch',sec.ch);
     const gridClass=sec.frame==='phone'?'grid-phones':'grid-wide';
-    s.innerHTML=
-      '<div class="sec-top"><div class="sec-no">'+sec.no+'</div>'+
-      '<div class="kick"><i></i><span>'+sec.no+' · '+sec.kick+'</span></div>'+
-      '<h2>'+sec.title+' <span class="badge '+sec.badge.c+'">'+sec.badge.t+'</span></h2>'+
-      '<p class="blurb">'+sec.blurb+'</p>'+
-      '<ul class="feats">'+sec.feats.map(f=>'<li>'+f+'</li>').join('')+'</ul>'+
-      '<a class="manual" href="'+sec.manual+'" target="_blank" rel="noopener">📄 User manual (PDF)</a></div>';
+    s.innerHTML='<div class="sec-top"><div class="sec-no">'+sec.no+'</div><div class="kick"><i></i><span>'+sec.no+' · '+sec.kick+'</span></div><h2>'+sec.title+' <span class="badge '+sec.badge.c+'">'+sec.badge.t+'</span></h2><p class="blurb">'+sec.blurb+'</p><ul class="feats">'+sec.feats.map(f=>'<li>'+f+'</li>').join('')+'</ul><a class="manual" href="'+sec.manual+'" target="_blank" rel="noopener">📄 User manual (PDF)</a></div>';
     s.appendChild(renderItems(sec.items,sec.frame,gridClass));
-    if(sec.sub){
-      const sb=document.createElement('div');sb.className='subblock';
-      sb.innerHTML='<h3>'+sec.sub.title+'</h3> <span class="badge '+sec.sub.badge.c+'">'+sec.sub.badge.t+'</span>'+
-        '<p class="note">'+sec.sub.note+'</p>';
-      sb.appendChild(renderItems(sec.sub.items,sec.frame,'grid-phones'));
-      s.appendChild(sb);
-    }
+    if(sec.sub){const sb=document.createElement('div');sb.className='subblock';
+      sb.innerHTML='<h3>'+sec.sub.title+'</h3> <span class="badge '+sec.sub.badge.c+'">'+sec.sub.badge.t+'</span><p class="note">'+sec.sub.note+'</p>';
+      sb.appendChild(renderItems(sec.sub.items,sec.frame,'grid-phones'));s.appendChild(sb);}
     secWrap.appendChild(s);
   });
-
-  // Print + Manuals sections
   function linkSection(id,no,kick,title,intro,arr){
     subnav.insertAdjacentHTML('beforeend','<a href="#'+id+'">'+kick+'</a>');
     const s=document.createElement('section');s.className='section';s.id=id;s.style.setProperty('--ch','#64748b');
-    s.innerHTML='<div class="sec-top"><div class="sec-no">'+no+'</div>'+
-      '<div class="kick"><i></i><span>'+no+' · '+kick+'</span></div>'+
-      '<h2>'+title+'</h2><p class="blurb">'+intro+'</p></div>'+
-      '<div class="linkgrid">'+arr.map(([t,d,u])=>
-        '<a class="lcard" href="'+PDF+u+'" target="_blank" rel="noopener"><span class="tag">PDF · QWeb</span>'+
-        '<h4>'+t+'</h4><p>'+d+'</p></a>').join('')+'</div>';
+    s.innerHTML='<div class="sec-top"><div class="sec-no">'+no+'</div><div class="kick"><i></i><span>'+no+' · '+kick+'</span></div><h2>'+title+'</h2><p class="blurb">'+intro+'</p></div><div class="linkgrid">'+arr.map(([t,d,u])=>'<a class="lcard" href="'+PDF+u+'" target="_blank" rel="noopener"><span class="tag">PDF · QWeb</span><h4>'+t+'</h4><p>'+d+'</p></a>').join('')+'</div>';
     secWrap.appendChild(s);
   }
-  linkSection('print','06','Print','“It still prints” — the paper book never goes away',
-    'Every digital record prints as a handbook-recognisable book: what is on the screen is also on paper. The app does not replace the book — it just fills it in.',PRINT);
-  linkSection('manuals','07','Manuals','Per-channel user manuals',
-    'One manual per channel — Vietnamese first with English alongside, A4 print-ready. The back-office manual mirrors the in-app Hướng dẫn pages.',MANUALS);
+  linkSection('print','06','Print','“It still prints” — the paper book never goes away','Every digital record prints as a handbook-recognisable book: what is on the screen is also on paper. The app does not replace the book — it just fills it in.',PRINT);
+  linkSection('manuals','07','Manuals','Per-channel user manuals','One manual per channel — Vietnamese first with English alongside, A4 print-ready. The back-office manual mirrors the in-app Hướng dẫn pages.',MANUALS);
 
   /* ==================== LIGHTBOX ==================== */
   const lb=document.getElementById('lb'),lbImg=document.getElementById('lb-img'),lbCap=document.getElementById('lb-cap');
@@ -479,42 +436,44 @@
   document.getElementById('lb-next').onclick=e=>{e.stopPropagation();lbGo(1);};
   lb.onclick=e=>{if(e.target===lb)lbClose();};
 
-  /* ==================== TABS / KEYS / FULLSCREEN ==================== */
+  /* ==================== TABS / NAV / FULLSCREEN ==================== */
   const views={poster:document.getElementById('view-poster'),app:document.getElementById('view-app')};
   function switchTab(name){
-    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+    document.querySelectorAll('.ftab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
     Object.entries(views).forEach(([k,v])=>v.classList.toggle('active',k===name));
     posterActive=(name==='poster');
-    if(posterActive){pSet(true);wake();}
-    else{document.body.classList.remove('pidle','pfull');clearTimeout(pTimer);cancelAnimationFrame(pRAF);window.scrollTo(0,0);}
+    document.body.classList.toggle('mode-poster',posterActive);
+    document.body.classList.toggle('mode-app',!posterActive);
+    if(posterActive){pPlaying=true;pRestart();wake();}
+    else{document.body.classList.remove('pidle');pStop();window.scrollTo(0,0);}
   }
-  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
+  document.querySelectorAll('.ftab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
+
+  /* expand-to-top: reveal the top overlay */
+  function setNav(open){document.body.classList.toggle('nav-open',open);}
+  document.getElementById('fexp').onclick=()=>setNav(!document.body.classList.contains('nav-open'));
+  document.getElementById('closeNav').onclick=()=>setNav(false);
 
   document.addEventListener('keydown',e=>{
-    if(lb.classList.contains('open')){
-      if(e.key==='Escape')lbClose();else if(e.key==='ArrowRight')lbGo(1);else if(e.key==='ArrowLeft')lbGo(-1);return;}
+    if(lb.classList.contains('open')){if(e.key==='Escape')lbClose();else if(e.key==='ArrowRight')lbGo(1);else if(e.key==='ArrowLeft')lbGo(-1);return;}
+    if(e.key==='Escape')setNav(false);
     if(posterActive){if(e.key==='ArrowRight')pNext();else if(e.key==='ArrowLeft')pPrev();
-      else if(e.key===' '){e.preventDefault();pSet(!pPlaying);}}
+      else if(e.key===' '){e.preventDefault();pPlaying=!pPlaying;pRestart();}}
   });
-  document.getElementById('fsBtn').onclick=()=>{
-    const el=document.documentElement;
+  document.getElementById('fsBtn').onclick=()=>{const el=document.documentElement;
     if(!document.fullscreenElement&&!document.webkitFullscreenElement)(el.requestFullscreen||el.webkitRequestFullscreen)?.call(el);
-    else (document.exitFullscreen||document.webkitExitFullscreen)?.call(document);
-    if(posterActive)document.body.classList.toggle('pfull');
-  };
-  document.addEventListener('visibilitychange',()=>{
-    if(document.hidden){clearTimeout(pTimer);cancelAnimationFrame(pRAF);}else if(pPlaying&&posterActive)pRestart();});
+    else (document.exitFullscreen||document.webkitExitFullscreen)?.call(document);};
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)pStop();else if(pPlaying&&posterActive&&!pHold)pRestart();});
 
-  // sub-nav / index links: switch to app tab if needed, then smooth scroll
+  /* subnav + index links → go to app tab, close overlay, scroll */
   document.addEventListener('click',e=>{
     const a=e.target.closest('.subnav a,.icard');if(!a)return;
     const href=a.getAttribute('href');if(!href||!href.startsWith('#'))return;
     e.preventDefault();
-    if(!posterActive===false){} // no-op guard
     if(posterActive)switchTab('app');
-    const t=document.querySelector(href);
-    if(t)setTimeout(()=>t.scrollIntoView({behavior:'smooth',block:'start'}),20);
-    else window.scrollTo({top:0,behavior:'smooth'});
+    setNav(false);
+    const t=href==='#top'?null:document.querySelector(href);
+    setTimeout(()=>{t?t.scrollIntoView({behavior:'smooth',block:'start'}):window.scrollTo({top:0,behavior:'smooth'});},30);
   });
   </script>
 </body>
