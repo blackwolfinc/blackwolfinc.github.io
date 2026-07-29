@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#1e1b4b" />
@@ -17,6 +17,7 @@
     }
     *{margin:0;padding:0;box-sizing:border-box}
     html,body{height:100%}
+    html,body{overscroll-behavior:none}
     body{font-family:var(--font);color:var(--ink);background:var(--bg);
       -webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
       -webkit-user-select:none;user-select:none;overflow:hidden}
@@ -79,12 +80,13 @@
     #view-app.active{position:fixed;inset:0;z-index:10;background:
       radial-gradient(130% 90% at 50% -10%, #ffffff 0%, #f6f2ea 46%, #efe9dc 100%);overflow:hidden}
     #deck{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-      overflow:auto;padding:clamp(56px,7vh,84px) clamp(64px,9vw,120px)}
+      overflow:auto;touch-action:pan-y;padding:clamp(56px,7vh,84px) clamp(64px,9vw,120px)}
     .step{width:100%;max-width:1120px;margin:auto;opacity:0;transform:translateY(10px);
       transition:opacity .4s ease,transform .4s ease}
     .step.in{opacity:1;transform:none}
 
     /* intro */
+    .ch-logo{height:clamp(40px,5.5vh,58px);display:block;margin:0 auto 22px;width:auto}
     .step-intro{text-align:center}
     .step-intro .eyebrow{font-size:clamp(12px,1.5vw,14px);font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--brand2)}
     .step-intro h1{font-size:clamp(30px,6vw,58px);color:var(--brand);letter-spacing:-.025em;line-height:1.05;margin-top:14px}
@@ -199,6 +201,40 @@
     .ov-card b{width:38px;height:38px;border-radius:10px;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
     .ov-card h3{font-size:15.5px;color:var(--ink)}.ov-card span{font-size:12.5px;color:var(--muted)}
 
+    /* ===== iMin Heron 1 & large touch kiosks (portrait 1080×1920) ===== */
+    @media (min-width:900px){
+      .step-intro h1{font-size:clamp(46px,6.4vw,74px)}
+      .step-chapter h1{font-size:clamp(40px,5.2vw,60px)}
+      .step-intro p,.step-chapter .blurb,.step-links .blurb{font-size:clamp(19px,2.1vw,23px);line-height:1.62}
+      .step-screen h2{font-size:clamp(34px,4vw,48px)}
+      .step-screen .detail{font-size:clamp(21px,2.3vw,27px)}
+      .step-screen .chan{font-size:16px}
+      .step-links h1,.step-closing h1{font-size:clamp(38px,5vw,56px)}
+      .feats li{font-size:15.5px;padding:9px 18px}
+      .badge{font-size:14px;padding:6px 15px}
+      .manual{font-size:16px;padding:12px 20px}
+      .go-hint{font-size:16px}
+      .chan-cards .cc{font-size:17px;padding:15px 21px}
+      .chan-cards .cc b{width:30px;height:30px;font-size:13px}
+      .dk-arw{width:76px;height:76px}.dk-arw svg{width:32px;height:32px}
+      #dk-ov{font-size:16px;padding:12px 20px}#dk-ov svg{width:20px;height:20px}
+      #dk-label{font-size:16px;padding:9px 22px}
+      .fab{padding:6px}.fab .ftab{font-size:16px;padding:12px 26px}.fab .fexp{width:42px;height:42px}
+      .ov-card{padding:22px}.ov-card b{width:44px;height:44px;font-size:16px}
+      .ov-card h3{font-size:17px}.ov-card span{font-size:13.5px}
+      .pitem{padding:24px}.pitem b{font-size:16px}.pitem span{font-size:14.5px}
+      .lcard h4{font-size:17px}.lcard p{font-size:13.5px}
+    }
+    /* Heron 1 stand — use the full vertical canvas: big device frames */
+    @media (min-width:900px) and (orientation:portrait){
+      #deck{padding:96px 60px 104px}
+      .step-screen{gap:clamp(28px,4vh,52px)}
+      .step-screen .phone{width:min(490px,45vh,86vw)}
+      .step-screen .browser{width:min(960px,92vw)}
+      .step-screen .kiosk{width:min(920px,92vw)}
+      .dk-arw{width:84px;height:84px}.dk-arw svg{width:36px;height:36px}
+    }
+
     /* lightbox */
     #lb{position:fixed;inset:0;z-index:130;background:rgba(15,13,30,.93);display:none;align-items:center;justify-content:center;padding:22px}
     #lb.open{display:flex}
@@ -214,7 +250,7 @@
 <body class="mode-poster">
   <header class="topbar">
     <div class="tbrow">
-      <div class="brand"><span>Sổ <b>CLB</b> số</span><span class="dot">· CaritaHub</span></div>
+      <div class="brand"><img src="assets/ch-logo.svg" alt="" style="height:24px"><span>Sổ <b>CLB</b> số</span></div>
       <div class="spacer"></div>
       <button class="iconbtn" id="fsBtn" title="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
       <button class="iconbtn" id="closeNav" title="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -293,6 +329,7 @@
      feats:['70 members, hardship categories, insurance','Self-generating schedules','60 seniors’ vitals in 40 minutes','Attention levels, never diagnosis','Day-care day board','Safety instructions for staff'],
      manual:PDF+'manuals/01-cong-quan-tri.pdf',
      items:[
+      ['01-login','Signing in to Sổ CLB số — a Vietnamese interface, with data hosted in Vietnam.'],
       ['02-members-list','The member book: 70 members with hardship categories and BHYT status; a one-tap “needs attention” filter.'],
       ['03-member-form-attention','A member record with its attention level — the orange is the system asking for a human decision.'],
       ['04-programme-form','A recurring programme — its “10th & 25th monthly” schedule generates every session automatically.'],
@@ -305,6 +342,7 @@
       ['11-daycare-enrolments','Day-care enrolments — the green “club member?” column: one senior, two services, one record.'],
       ['12-enrolment-safety','The red safety band says what staff must do — never what a person has; plus who may collect.'],
       ['13-centre-kpis','Centre numbers: regulars, visits per 30 days, coverage (illustrative figures).'],
+      ['15-province-aggregates','The province view: aggregates only, no member records — visibility is earned by relationship, not granted by role.'],
      ]},
     {id:'staff',no:'02',kick:'Staff & volunteers',ch:'#159a6b',frame:'phone',badge:{t:'Prototype — in build',c:'proto'},
      title:'The staff & volunteer app',
@@ -330,7 +368,9 @@
       ['station-idle','The idle screen: solar and lunar date, one big button to begin.'],
       ['station-identify','“Please tap your name” — proper honorifics (Ông/Bà/Cụ), accent-free search, or the member QR.'],
       ['station-hub','Hello Ông An: three tasks, three big targets — attendance, health reading, sign-up.'],
-      ['station-measure','The paired cuff and scale read automatically — readings land in the health book and print as a slip; the demo uses a clearly-labelled simulator.'],
+      ['station-measure','The paired cuff and scale read automatically — the demo uses a clearly-labelled simulator.'],
+      ['station-reading','The reading comes back in big type — confirmed on screen before anything is saved.'],
+      ['station-saved','Saved to the health book, a take-home slip prints, and the station invites the next person.'],
      ]},
     {id:'family',no:'04',kick:'Family',ch:'#3b6fe0',frame:'phone',badge:{t:'Prototype',c:'proto'},
      title:'The family app — reassurance first, detail second',
@@ -359,10 +399,10 @@
      ]},
   ];
   const PRINT=[
-    ['Sổ thành viên','The member book — hardship categories and BHYT','screenshots/print/so-thanh-vien.pdf'],
-    ['Sổ theo dõi sức khỏe','The health book — BP and weight across the months','screenshots/print/so-theo-doi-suc-khoe.pdf'],
-    ['Sổ điểm danh ngày','Inspection-ready daily register — safety line + medication column','screenshots/print/so-diem-danh-ngay.pdf'],
-    ['Báo cáo tháng','Month versus month — “the report writes itself”','screenshots/print/bao-cao-thang.pdf'],
+    ['Sổ thành viên','The member book — hardship categories and BHYT','assets/print/so-thanh-vien.pdf'],
+    ['Sổ theo dõi sức khỏe','The health book — BP and weight across the months','assets/print/so-theo-doi-suc-khoe.pdf'],
+    ['Sổ điểm danh ngày','Inspection-ready daily register — safety line + medication column','assets/print/so-diem-danh-ngay.pdf'],
+    ['Báo cáo tháng','Month versus month — “the report writes itself”','assets/print/bao-cao-thang.pdf'],
   ];
   const MANUALS=[
     ['Cổng quản trị','Nine sections — mirrors the in-app manual','manuals/01-cong-quan-tri.pdf'],
@@ -411,7 +451,8 @@
 
   function stepHTML(s){
     if(s.type==='intro')
-      return '<div class="step step-intro"><div class="eyebrow">Intergenerational self-help clubs · Adult day care</div>'+
+      return '<div class="step step-intro"><img class="ch-logo" src="assets/ch-logo.svg" alt="CaritaHub">'+
+        '<div class="eyebrow">Intergenerational self-help clubs · Adult day care</div>'+
         '<h1>One senior, two services,<br>one record.</h1>'+
         '<p><b>Sổ CLB số</b> is the club book, digital — one system, five channels, all on a single record, and it still prints. Tap a channel, or use the arrow to walk through step by step.</p>'+
         '<div class="chan-cards">'+SECTIONS.map(x=>'<div class="cc" data-jump="'+x.id+'"><b style="background:'+x.ch+'">'+x.no+'</b>'+x.kick+'</div>').join('')+'</div></div>';
@@ -434,9 +475,10 @@
     if(s.type==='links')
       return '<div class="step step-links" style="--ch:'+s.accent+'"><div class="kick"><i></i><span>'+s.no+' · '+s.kick+'</span></div>'+
         '<h1>'+esc(s.title)+'</h1><p class="blurb">'+esc(s.blurb)+'</p>'+
-        '<div class="linkgrid">'+s.arr.map(([t,d,u])=>'<a class="lcard" href="'+PDF+u+'" target="_blank" rel="noopener"><span class="tag">PDF · QWeb</span><h4>'+esc(t)+'</h4><p>'+esc(d)+'</p></a>').join('')+'</div></div>';
+        '<div class="linkgrid">'+s.arr.map(([t,d,u])=>'<a class="lcard" href="'+(u.startsWith('assets/')||u.startsWith('http')?u:PDF+u)+'" target="_blank" rel="noopener"><span class="tag">PDF · QWeb</span><h4>'+esc(t)+'</h4><p>'+esc(d)+'</p></a>').join('')+'</div></div>';
     if(s.type==='closing')
-      return '<div class="step step-closing"><h1>Five channels, one data discipline</h1>'+
+      return '<div class="step step-closing"><img class="ch-logo" src="assets/ch-logo.svg" alt="CaritaHub" style="margin-bottom:20px">'+
+        '<h1>Five channels, one data discipline</h1>'+
         '<div class="plist">'+
         '<div class="pitem"><b>Consent is a first-class record</b><span>Family pages refuse to render without consent; withdrawing it kills links already shared.</span></div>'+
         '<div class="pitem"><b>Attention levels, never diagnosis</b><span>No condition fields, no scores; safety info is written as staff instructions. Medication is a reminder log.</span></div>'+
