@@ -1,0 +1,25 @@
+{
+  "name": "Sổ CLB số — CaritaHub",
+  "short_name": "Sổ CLB số",
+  "description": "Sổ CLB số CaritaHub — trình chiếu poster và ảnh chụp màn hình ứng dụng cho kiosk câu lạc bộ, hoạt động ngoại tuyến.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

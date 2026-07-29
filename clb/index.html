@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#1e1b4b" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./assets/icon.svg" />
+  <link rel="preload" as="image" href="posters/1.webp" />
+  <link rel="preload" as="image" href="assets/ch-logo.svg" />
   <title>Sổ CLB số — CaritaHub</title>
   <style>
     :root{
@@ -237,6 +241,70 @@
       .dk-arw{width:84px;height:84px}.dk-arw svg{width:36px;height:36px}
     }
 
+    /* ---- stats (impact numbers) ---- */
+    .step-stats{text-align:center}
+    .step-stats h1{font-size:clamp(24px,4vw,42px);color:var(--brand);letter-spacing:-.02em;line-height:1.1;margin:14px auto 0;max-width:820px}
+    .stat-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));max-width:920px;margin:30px auto 0}
+    .stat-tile{background:var(--surface);border:1px solid transparent;border-radius:18px;padding:26px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+    .stat-num{font-size:clamp(38px,6vw,60px);font-weight:800;color:var(--brand);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+    .stat-lab{color:var(--muted);font-size:clamp(13px,1.5vw,15px);line-height:1.45;max-width:220px}
+    .stat-note{margin-top:22px;color:var(--muted);font-size:12.5px;font-weight:600}
+    /* ---- geo ---- */
+    .step-geo{text-align:center}
+    .step-geo h1{font-size:clamp(24px,4vw,42px);color:var(--brand);letter-spacing:-.02em;line-height:1.1;margin:14px auto 0;max-width:820px}
+    .geo-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));max-width:900px;margin:30px auto 0;text-align:left}
+    .geo-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;transition:.16s}
+    .geo-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,0,0,.10)}
+    .geo-head{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16.5px;color:var(--brand)}
+    .geo-dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+    .geo-list{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
+    .geo-list li{display:flex;align-items:center;gap:9px;font-size:13.5px;color:#4b5563;line-height:1.4}
+    .geo-list li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--line);flex:0 0 auto}
+    /* ---- closing scan card ---- */
+    .close-scan{display:flex;align-items:center;justify-content:center;gap:clamp(18px,3vw,30px);flex-wrap:wrap;
+      background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
+      padding:clamp(18px,2.4vw,26px);max-width:560px;margin:26px auto 0;text-align:left}
+    .scan-qr{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;flex:0 0 auto}
+    .scan-qr img{display:block;width:clamp(120px,18vh,180px);height:clamp(120px,18vh,180px);object-fit:contain;border-radius:6px}
+    .scan-txt{display:flex;flex-direction:column;gap:6px;min-width:180px}
+    .scan-txt b{color:var(--brand);font-size:15.5px}
+    .scan-txt a{font-size:14px;font-weight:700;color:var(--brand2);width:fit-content}
+    .scan-txt a:hover{text-decoration:underline}
+    .scan-txt span{color:var(--muted);font-size:12.5px;line-height:1.5;margin-top:2px}
+    @media(max-width:520px){.close-scan{text-align:center}.scan-txt{align-items:center}}
+    @media (min-width:900px){
+      .step-stats h1,.step-geo h1{font-size:clamp(38px,5vw,56px)}
+      .stat-num{font-size:clamp(52px,6vw,74px)}.stat-lab{font-size:16px;max-width:240px}.stat-tile{padding:32px 24px}
+      .geo-head{font-size:19px}.geo-list li{font-size:16px}
+      .scan-txt b{font-size:18px}.scan-txt a{font-size:16px}.scan-txt span{font-size:14px}
+    }
+    /* ---- language toggle + PDF viewer ---- */
+    .langtog{appearance:none;border:1px solid var(--line);background:#fff;cursor:pointer;font-family:inherit;
+      font-weight:700;font-size:12.5px;color:var(--brand);border-radius:999px;padding:7px 12px;line-height:1}
+    .langtog b{color:var(--brand2)}
+    #pdfview{position:fixed;inset:0;z-index:125;background:rgba(15,13,30,.92);display:none;flex-direction:column;padding:max(14px,env(safe-area-inset-top)) 14px 14px}
+    #pdfview.open{display:flex}
+    #pdfview .pv-bar{display:flex;align-items:center;gap:12px;color:#fff;padding:6px 6px 12px}
+    #pdfview .pv-bar b{font-size:15px;flex:1}
+    #pdfview .pv-x{cursor:pointer;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(255,255,255,.12)}
+    #pdfview iframe{flex:1;width:100%;border:0;border-radius:12px;background:#fff}
+    /* ---- search in overview ---- */
+    #ov-search{width:100%;max-width:560px;margin:18px auto 0;display:block;border:1px solid var(--line);background:#fff;
+      border-radius:12px;padding:13px 16px;font-family:inherit;font-size:15px;color:var(--ink);outline:none}
+    #ov-search:focus{border-color:var(--brand2);box-shadow:0 0 0 3px rgba(47,109,246,.15)}
+    #ov-results{max-width:900px;margin:16px auto 0;width:100%;display:flex;flex-direction:column;gap:8px}
+    .ov-res{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 15px;cursor:pointer;text-align:left}
+    .ov-res:hover{background:var(--surface)}
+    .ov-res .r-ch{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--brand2);flex:0 0 auto;width:96px}
+    .ov-res .r-cap{font-size:13.5px;color:var(--ink);line-height:1.35}
+    /* ---- a11y & micro-interactions ---- */
+    :focus-visible{outline:2px solid var(--brand2);outline-offset:2px;border-radius:6px}
+    #dk-label{font-variant-numeric:tabular-nums}
+    .icard:active,.lcard:active,.geo-card:active,.chan-cards .cc:active,.ov-card:active,.stat-tile:active{transform:scale(.985)}
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important;scroll-behavior:auto !important}
+    }
+
     /* lightbox */
     #lb{position:fixed;inset:0;z-index:130;background:rgba(15,13,30,.93);display:none;align-items:center;justify-content:center;padding:22px}
     #lb.open{display:flex}
@@ -254,6 +322,7 @@
     <div class="tbrow">
       <div class="brand"><img src="assets/ch-logo.svg" alt="" style="height:24px"><span>Sổ <b>CLB</b> số</span></div>
       <div class="spacer"></div>
+      <button class="langtog" id="langBtn" title="Ngôn ngữ / Language"><b>EN</b> · VI</button>
       <button class="iconbtn" id="fsBtn" title="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
       <button class="iconbtn" id="closeNav" title="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
@@ -286,14 +355,20 @@
   </div>
 
   <!-- OVERVIEW -->
-  <div id="ov"><div class="ov-x" id="ov-x">&times;</div><h2>Overview — jump to a section</h2><div class="ov-grid" id="ov-grid"></div></div>
+  <div id="ov"><div class="ov-x" id="ov-x">&times;</div><h2 id="ov-title">Overview — jump to a section</h2>
+    <input id="ov-search" type="search" placeholder="Search screens…" autocomplete="off">
+    <div id="ov-results"></div>
+    <div class="ov-grid" id="ov-grid"></div></div>
+
+  <!-- inline PDF viewer -->
+  <div id="pdfview"><div class="pv-bar"><b id="pv-title"></b><div class="pv-x" id="pv-x">&times;</div></div><iframe id="pv-frame" title="PDF"></iframe></div>
 
   <!-- LIGHTBOX -->
   <div id="lb"><div class="x" id="lb-x">&times;</div><div class="arw prev" id="lb-prev">&#8249;</div><div class="arw next" id="lb-next">&#8250;</div><div class="box"><img id="lb-img" src="" alt=""><div class="cap" id="lb-cap"></div></div></div>
 
   <script>
   /* ==================== POSTER ==================== */
-  const POSTERS=["posters/1.jpg","posters/2.jpg","posters/3.jpg","posters/4.jpg","posters/5.jpg"];
+  const POSTERS=["posters/1.webp","posters/2.webp","posters/3.webp","posters/4.webp","posters/5.webp"];
   const stage=document.getElementById('stage'),dotsWrap=document.getElementById('dots'),bar=document.getElementById('bar');
   const SLIDE_MS=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slide-seconds'))||8)*1000;
   let pIdx=0,pPlaying=true,pTimer=null,pStart=0,pRAF=null,posterActive=true,pHold=false;
@@ -422,11 +497,15 @@
     CH.push({name:sec.kick,no:sec.no,accent:sec.ch,start:STEPS.length});
     STEPS.push({type:'chapter',sec,chapter:sec.kick,accent:sec.ch});
     sec.items.forEach(([file,cap],i)=>{
-      const si=shots.length;shots.push({file:'app/'+file+'.jpg',cap});
-      STEPS.push({type:'screen',frame:sec.frame,file,cap,accent:sec.ch,chapter:sec.kick,no:sec.no,
+      const si=shots.length;shots.push({file:'app/'+file+'.webp',cap});
+      STEPS.push({type:'screen',frame:sec.frame,file,cap,accent:sec.ch,chapter:sec.kick,chId:sec.id,no:sec.no,
         idx:i+1,len:sec.items.length,shot:si});
     });
   });
+  CH.push({name:'Numbers',no:'',accent:'#2f6df6',start:STEPS.length});
+  STEPS.push({type:'stats',chapter:'Numbers',accent:'#2f6df6'});
+  CH.push({name:'Where it runs',no:'',accent:'#2f6df6',start:STEPS.length});
+  STEPS.push({type:'geo',chapter:'Where it runs',accent:'#2f6df6'});
   CH.push({name:'Print',no:'06',accent:'#64748b',start:STEPS.length});
   STEPS.push({type:'links',no:'06',kick:'Print',accent:'#64748b',chapter:'Print',
     title:'“It still prints” — the paper book never goes away',
@@ -444,9 +523,9 @@
   let deckIdx=0;
 
   function frameHTML(frame,file,alt){
-    if(frame==='browser')return '<div class="browser"><div class="b-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="addr">so-clb-so.caritahub.vn</span></div><div class="screen"><img src="app/'+file+'.jpg" alt="'+alt+'"></div></div>';
-    if(frame==='kiosk')return '<div class="kiosk"><div class="screen"><img src="app/'+file+'.jpg" alt="'+alt+'"></div></div><div class="stand"></div>';
-    return '<div class="phone"><div class="screen"><img src="app/'+file+'.jpg" alt="'+alt+'"></div></div>';
+    if(frame==='browser')return '<div class="browser"><div class="b-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="addr">so-clb-so.caritahub.vn</span></div><div class="screen"><img src="app/'+file+'.webp" alt="'+alt+'"></div></div>';
+    if(frame==='kiosk')return '<div class="kiosk"><div class="screen"><img src="app/'+file+'.webp" alt="'+alt+'"></div></div><div class="stand"></div>';
+    return '<div class="phone"><div class="screen"><img src="app/'+file+'.webp" alt="'+alt+'"></div></div>';
   }
   function splitCap(c){let p=c.split(' — ');if(p.length>1)return[p[0],p.slice(1).join(' — ')];p=c.split(': ');if(p.length>1)return[p[0],p.slice(1).join(': ')];return[c,''];}
   function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');}
@@ -454,42 +533,59 @@
   function stepHTML(s){
     if(s.type==='intro')
       return '<div class="step step-intro"><img class="ch-logo" src="assets/ch-logo.svg" alt="CaritaHub">'+
-        '<div class="eyebrow">Intergenerational self-help clubs · Adult day care</div>'+
-        '<h1>One senior, two services,<br>one record.</h1>'+
-        '<p><b>Sổ CLB số</b> is the club book, digital — one system, five channels, all on a single record, and it still prints. Tap a channel, or use the arrow to walk through step by step.</p>'+
-        '<div class="chan-cards">'+SECTIONS.map(x=>'<div class="cc" data-jump="'+x.id+'"><b style="background:'+x.ch+'">'+x.no+'</b>'+x.kick+'</div>').join('')+'</div></div>';
-    if(s.type==='chapter'){const c=s.sec;
+        '<div class="eyebrow">'+tc('Intergenerational self-help clubs · Adult day care',VI.intro.eyebrow)+'</div>'+
+        '<h1>'+tc('One senior, two services,<br>one record.',VI.intro.h1)+'</h1>'+
+        '<p>'+tc('<b>Sổ CLB số</b> is the club book, digital — one system, five channels, all on a single record, and it still prints. Tap a channel, or use the arrow to walk through step by step.',VI.intro.p)+'</p>'+
+        '<div class="chan-cards">'+SECTIONS.map(x=>'<div class="cc" data-jump="'+x.id+'"><b style="background:'+x.ch+'">'+x.no+'</b>'+tc(x.kick,vch(x.id).kick)+'</div>').join('')+'</div></div>';
+    if(s.type==='chapter'){const c=s.sec,v=vch(c.id);
       return '<div class="step step-chapter" style="--ch:'+c.ch+'"><div class="big-no">'+c.no+'</div>'+
-        '<div class="kick"><i></i><span>'+c.no+' · '+c.kick+'</span></div>'+
-        '<h1>'+esc(c.title)+'</h1><span class="badge '+c.badge.c+'">'+c.badge.t+'</span>'+
-        '<p class="blurb">'+esc(c.blurb)+'</p>'+
-        '<ul class="feats">'+c.feats.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul>'+
-        '<a class="manual" href="'+c.manual+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> User manual (PDF)</a>'+
-        '<div class="go-hint">Tap → to see each screen</div></div>';
+        '<div class="kick"><i></i><span>'+c.no+' · '+tc(c.kick,v.kick)+'</span></div>'+
+        '<h1>'+esc(tc(c.title,v.title))+'</h1><span class="badge '+c.badge.c+'">'+c.badge.t+'</span>'+
+        '<p class="blurb">'+esc(tc(c.blurb,v.blurb))+'</p>'+
+        '<ul class="feats">'+(LANG==='vi'&&v.feats?v.feats:c.feats).map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul>'+
+        '<a class="manual" href="'+c.manual+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> '+L('User manual (PDF)','manual')+'</a>'+
+        '<div class="go-hint">'+L('Tap → to see each screen','seeScreens')+'</div></div>';
     }
-    if(s.type==='screen'){const[t,d]=splitCap(s.cap);
+    if(s.type==='screen'){const cap=tc(s.cap,VI.caps[s.file]);const[t,d]=splitCap(cap);
       return '<div class="step step-screen" style="--ch:'+s.accent+'">'+
         '<div class="dev" data-shot="'+s.shot+'">'+frameHTML(s.frame,s.file,esc(t))+'</div>'+
-        '<div class="txt"><div class="chan"><i></i>'+s.no+' · '+s.chapter+' · '+s.idx+'/'+s.len+'</div>'+
+        '<div class="txt"><div class="chan"><i></i>'+s.no+' · '+tc(s.chapter,vch(s.chId).kick)+' · '+s.idx+'/'+s.len+'</div>'+
         '<h2>'+esc(t)+'</h2>'+(d?'<p class="detail">'+esc(d)+'</p>':'')+
-        '<div class="zoom"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> Tap the screen to zoom</div></div></div>';
+        '<div class="zoom"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> '+L('Tap the screen to zoom','tapZoom')+'</div></div></div>';
     }
-    if(s.type==='links')
-      return '<div class="step step-links" style="--ch:'+s.accent+'"><div class="kick"><i></i><span>'+s.no+' · '+s.kick+'</span></div>'+
-        '<h1>'+esc(s.title)+'</h1><p class="blurb">'+esc(s.blurb)+'</p>'+
-        '<div class="linkgrid">'+s.arr.map(([t,d,u])=>'<a class="lcard" href="'+(u.startsWith('assets/')||u.startsWith('http')?u:PDF+u)+'" target="_blank" rel="noopener"><span class="tag">PDF · QWeb</span><h4>'+esc(t)+'</h4><p>'+esc(d)+'</p></a>').join('')+'</div></div>';
-    if(s.type==='closing')
+    if(s.type==='links'){const vd=LANG==='vi'?(s.no==='06'?VI.print:VI.manuals):null,vi=vd&&vd.items||{};
+      return '<div class="step step-links" style="--ch:'+s.accent+'"><div class="kick"><i></i><span>'+s.no+' · '+tc(s.kick,s.no==='06'?T.vi.printKick:T.vi.manualsKick)+'</span></div>'+
+        '<h1>'+esc(tc(s.title,vd&&vd.title))+'</h1><p class="blurb">'+esc(tc(s.blurb,vd&&vd.blurb))+'</p>'+
+        '<div class="linkgrid">'+s.arr.map(([t,d,u])=>{var k=u.split("/").pop().replace(".pdf","");return '<a class="lcard" href="'+(u.startsWith('assets/')||u.startsWith('http')?u:PDF+u)+'" target="_blank" rel="noopener"><span class="tag">PDF · QWeb</span><h4>'+esc(t)+'</h4><p>'+esc(tc(d,vi[k]))+'</p></a>';}).join('')+'</div></div>';}
+    if(s.type==='closing'){var vp=LANG==='vi'?VI.closing.principles:PR_EN;
       return '<div class="step step-closing"><img class="ch-logo" src="assets/ch-logo.svg" alt="CaritaHub" style="margin-bottom:20px">'+
-        '<h1>Five channels, one data discipline</h1>'+
-        '<div class="plist">'+
-        '<div class="pitem"><b>Consent is a first-class record</b><span>Family pages refuse to render without consent; withdrawing it kills links already shared.</span></div>'+
-        '<div class="pitem"><b>Attention levels, never diagnosis</b><span>No condition fields, no scores; safety info is written as staff instructions. Medication is a reminder log.</span></div>'+
-        '<div class="pitem"><b>Each channel sees exactly its share</b><span>Family: no health data. Volunteers: only assigned work. Station resets after 45s. Province: aggregates only.</span></div>'+
-        '<div class="pitem"><b>One door into the data</b><span>Apps go through the gateway with per-user sessions — access is decided by the core system.</span></div></div>'+
+        '<h1>'+tc('Five channels, one data discipline',VI.closing.h1)+'</h1>'+
+        '<div class="plist">'+vp.map(function(p){return '<div class="pitem"><b>'+p.b+'</b><span>'+p.span+'</span></div>';}).join('')+'</div>'+
+        '<div class="close-scan"><div class="scan-qr"><img src="assets/visit-qr.svg" alt="Scan to open CaritaHub on your phone"></div>'+
+        '<div class="scan-txt"><b>'+L('Scan to open on your phone','scanTitle')+'</b>'+
+        '<a href="https://www.caritahub.com" target="_blank" rel="noopener">www.caritahub.com</a>'+
+        '<a href="mailto:hello@caritahub.com">hello@caritahub.com</a>'+
+        '<span>Demo · Vietnam Medi-Pharm Expo · 30 Jul – 1 Aug 2026</span></div></div>'+
         '<div class="close-foot"><div class="flogo">Sổ <b>CLB</b> số · CaritaHub</div>'+
         'powered by Weeswares · Demo: Vietnam Medi-Pharm Expo, 30 Jul – 1 Aug 2026'+
         '<div class="flinks"><a href="https://caritahub-vn.up.railway.app/" target="_blank" rel="noopener">Back-office demo →</a>'+
         '<a href="https://gateway-production-5366.up.railway.app/docs" target="_blank" rel="noopener">API · OpenAPI →</a></div></div></div>';
+    }
+    if(s.type==='stats')
+      return '<div class="step step-stats" style="--ch:'+s.accent+'"><div class="kick"><i></i><span>'+L('Numbers','numbers')+'</span></div>'+
+        '<h1>'+L('The scale it runs at','statsH1')+'</h1><div class="stat-grid">'+
+        '<div class="stat-tile"><div class="stat-num" data-target="10" data-suffix="K">0</div><div class="stat-lab">'+L('check-ins per day (mainly via DIY kiosk)','stat1')+'</div></div>'+
+        '<div class="stat-tile"><div class="stat-num" data-target="200" data-suffix="K">0</div><div class="stat-lab">'+L('seniors','stat2')+'</div></div>'+
+        '<div class="stat-tile"><div class="stat-num" data-target="30" data-suffix="K">0</div><div class="stat-lab">'+L('activities','stat3')+'</div></div>'+
+        '<div class="stat-tile"><div class="stat-num" data-target="40" data-suffix="%">0</div><div class="stat-lab">'+L('of Active Ageing Centres in Singapore use CaritaHub','stat4')+'</div></div>'+
+        '</div><div class="stat-note">'+L('Illustrative figures.','illustrative')+'</div></div>';
+    if(s.type==='geo')
+      return '<div class="step step-geo" style="--ch:'+s.accent+'"><div class="kick"><i></i><span>'+L('Where it runs','whereRuns')+'</span></div>'+
+        '<h1>'+L('Three countries, one platform','geoH1')+'</h1><div class="geo-grid">'+
+        '<div class="geo-card"><div class="geo-head"><span class="geo-dot" style="background:#2f6df6"></span>Singapore</div><ul class="geo-list"><li>'+L('Active Ageing Centres','sg1')+'</li><li>'+L('day care','daycare')+'</li><li>'+L('home care','homecare')+'</li><li>'+L('nursing homes','nursing')+'</li></ul></div>'+
+        '<div class="geo-card"><div class="geo-head"><span class="geo-dot" style="background:#159a6b"></span>Indonesia</div><ul class="geo-list"><li>'+L('senior living','id1')+'</li><li>'+L('senior clubs','id2')+'</li><li>'+L('home care','homecare')+'</li><li>'+L('nursing homes','nursing')+'</li></ul></div>'+
+        '<div class="geo-card"><div class="geo-head"><span class="geo-dot" style="background:#d1543f"></span>Vietnam</div><ul class="geo-list"><li>'+L('clubs','vn1')+'</li><li>'+L('day care','daycare')+'</li></ul></div>'+
+        '</div></div>';
     return '';
   }
   function renderDeck(){
@@ -497,12 +593,14 @@
     deck.innerHTML=stepHTML(s);
     deck.scrollTop=0;
     const el=deck.firstElementChild;requestAnimationFrame(()=>el&&el.classList.add('in'));
+    if(s.type==='stats')animateStats();
+    if(typeof updateHash==='function')updateHash();
     // wire interactions
     deck.querySelectorAll('[data-jump]').forEach(c=>c.onclick=()=>{const ch=CH.find(x=>{const sec=SECTIONS.find(y=>y.kick===x.name);return sec&&sec.id===c.dataset.jump;});if(ch)deckJump(ch.start);});
     const dev=deck.querySelector('[data-shot]');if(dev)dev.onclick=()=>lbOpen(+dev.dataset.shot);
     // progress + label
     dkBar.style.width=((deckIdx+1)/STEPS.length*100)+'%';
-    dkLabel.textContent=s.type==='screen'?(s.chapter+' · '+s.idx+'/'+s.len):s.chapter;
+    dkLabel.textContent=s.type==='screen'?(cn(s.chapter,s.chId)+' · '+s.idx+'/'+s.len):cn(s.chapter,s.type==='chapter'?s.sec.id:null);
     dkPrev.disabled=deckIdx===0;dkNext.disabled=deckIdx===STEPS.length-1;
   }
   function deckGo(d){deckJump(deckIdx+d);}
@@ -517,11 +615,11 @@
 
   /* ==================== OVERVIEW ==================== */
   const ov=document.getElementById('ov'),ovGrid=document.getElementById('ov-grid');
-  CH.forEach(ch=>{const card=document.createElement('div');card.className='ov-card';
-    const label=ch.no?(ch.no+' · '+ch.name):ch.name;
+  function buildOverview(){ovGrid.innerHTML='';CH.forEach(ch=>{const card=document.createElement('div');card.className='ov-card';
     const count=STEPS.filter((s,i)=>{const nextStart=CH[CH.indexOf(ch)+1]?CH[CH.indexOf(ch)+1].start:STEPS.length;return i>ch.start&&i<nextStart&&s.type==='screen';}).length;
-    card.innerHTML='<b style="background:'+ch.accent+'">'+(ch.no||'•')+'</b><div><h3>'+ch.name+'</h3><span>'+(count?count+' screens':'section')+'</span></div>';
-    card.onclick=()=>{deckJump(ch.start);ov.classList.remove('open');};ovGrid.appendChild(card);});
+    const chid=(SECTIONS.find(x=>x.kick===ch.name)||{}).id;
+    card.innerHTML='<b style="background:'+ch.accent+'">'+(ch.no||'•')+'</b><div><h3>'+cn(ch.name,chid)+'</h3><span>'+(count?count+' '+L('screens','screens'):L('section','section'))+'</span></div>';
+    card.onclick=()=>{deckJump(ch.start);ov.classList.remove('open');};ovGrid.appendChild(card);});}
   document.getElementById('dk-ov').onclick=()=>ov.classList.add('open');
   document.getElementById('ov-x').onclick=()=>ov.classList.remove('open');
   ov.onclick=e=>{if(e.target===ov)ov.classList.remove('open');};
@@ -565,6 +663,152 @@
     else{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();deckGo(1);}else if(e.key==='ArrowLeft')deckGo(-1);}
   });
   document.addEventListener('visibilitychange',()=>{if(document.hidden)pStop();else if(pPlaying&&posterActive&&!pHold)pRestart();});
+
+  /* ==================== i18n (Vietnamese overlay — DRAFT) ==================== */
+  const VI = {
+    ui:{overview:"Tổng quan",poster:"Áp phích",app:"Ứng dụng"},
+    intro:{
+      eyebrow:"Câu lạc bộ liên thế hệ tự giúp nhau · Chăm sóc người cao tuổi ban ngày",
+      h1:"Một người cao tuổi, hai dịch vụ,<br>một hồ sơ.",
+      p:"<b>Sổ CLB số</b> là quyển sổ câu lạc bộ, phiên bản số — một hệ thống, năm kênh, tất cả trên cùng một hồ sơ, và vẫn in ra được. Chạm vào một kênh, hoặc dùng mũi tên để đi qua từng bước."
+    },
+    chapters:{
+      backend:{kick:"Văn phòng điều hành",title:"Văn phòng Odoo — nơi vận hành cả hai dịch vụ",blurb:"Chỉ một người điều hành — chị Hoa, thư ký câu lạc bộ — vận hành cả câu lạc bộ lẫn trung tâm chăm sóc ban ngày trên cùng một màn hình. Nguyên tắc xuyên suốt: hệ thống gợi ý, con người quyết định — không bao giờ là chẩn đoán.",feats:["70 thành viên, diện hoàn cảnh khó khăn, bảo hiểm","Lịch sinh hoạt tự tạo","Chỉ số sức khỏe của 60 người cao tuổi trong 40 phút","Mức quan tâm, không phải chẩn đoán","Bảng theo dõi ngày của trung tâm ban ngày","Hướng dẫn an toàn cho nhân viên"]},
+      staff:{kick:"Nhân viên và tình nguyện viên",title:"Ứng dụng cho nhân viên và tình nguyện viên",blurb:"Toàn bộ công việc của buổi sinh hoạt, gọn trong túi: điểm danh hai chạm, đo chỉ số ngay tại chỗ, danh sách cần quan tâm, và phiếu thăm hỏi 30 giây. Tình nguyện viên chỉ thấy những kế hoạch chăm sóc được giao — không gì hơn.",feats:["Điểm danh hai chạm","Đo chỉ số ngay tại buổi sinh hoạt","Phiếu thăm hỏi 30 giây","Tình nguyện viên chỉ thấy phần việc của mình","Xem trước sổ và xuất PDF"]},
+      station:{kick:"Trạm sinh hoạt",title:"Trạm sinh hoạt — một máy tính bảng gắn cố định ngay bàn sinh hoạt",blurb:"Chế độ trạm của ứng dụng nhân viên — nhưng người dùng chính là các cụ. Chạm vào tên mình, đo chỉ số với sự hỗ trợ của thiết bị, đăng ký buổi kế tiếp. Sau 45 giây không thao tác, màn hình tự khởi động lại để không lưu lại điều gì riêng tư.",feats:["Chạm vào tên hoặc quét mã QR","Chữ to, xưng hô đúng mực","Đo chỉ số với hỗ trợ của thiết bị","Phiếu mang về được in ra","Tự làm mới bảo mật sau 45 giây","Chế độ trạm khóa bằng mã PIN"]},
+      family:{kick:"Gia đình",title:"Ứng dụng gia đình — an lòng trước, chi tiết sau",blurb:"Dành cho con cháu sống ở xa. Điều hiện ra đầu tiên là điều quan trọng nhất — Mẹ vẫn khỏe — rồi mới đến những khoảnh khắc trong ngày. Các trang dành cho gia đình không mang dữ liệu sức khỏe; việc chia sẻ chỉ mở khi đã có sự đồng ý được lưu lại.",feats:["An lòng trước tiên","Không có dữ liệu sức khỏe","Chỉ mở khi có sự đồng ý","Một ngày bình lặng vẫn là tin vui"]},
+      senior:{kick:"Người cao tuổi",title:"Ứng dụng cho người cao tuổi — một người bạn đồng hành, không bao giờ là điều bắt buộc",blurb:"Câu lạc bộ vẫn vận hành trọn vẹn dù cụ không hề chạm vào điện thoại — ứng dụng này chỉ dành cho ai muốn dùng. Chữ to, ít việc, việc nào cũng rõ ràng. Liên kết chỉ là một mã sáu chữ số do chủ nhiệm câu lạc bộ đọc lên — không cần mật khẩu.",feats:["Một chạm “Tôi sẽ đến”","Chỉ số của chính mình, giống hệt trong sổ giấy","Mã liên kết sáu chữ số, không mật khẩu","Tùy chọn — không có nó câu lạc bộ vẫn chạy tốt"]}
+    },
+    caps:{
+      "01-login":"Đăng nhập Sổ CLB số — giao diện tiếng Việt, dữ liệu đặt tại Việt Nam.",
+      "02-members-list":"Sổ thành viên: 70 thành viên kèm diện hoàn cảnh và tình trạng BHYT; bộ lọc “cần quan tâm” chỉ một chạm.",
+      "03-member-form-attention":"Hồ sơ một thành viên cùng mức quan tâm — màu cam là lúc hệ thống đề nghị con người ra quyết định.",
+      "04-programme-form":"Một chương trình định kỳ — lịch “ngày 10 và 25 hằng tháng” tự tạo mọi buổi sinh hoạt.",
+      "05-club-calendar":"Lịch câu lạc bộ — trọn một tháng của câu lạc bộ trong một cái nhìn.",
+      "06-vitals-grid":"Chỉ số buổi sinh hoạt: bảng nhập huyết áp và cân nặng hàng loạt — 60 người cao tuổi trong 40 phút.",
+      "07-attention-inbox":"Hộp thư “cần quan tâm”: vắng liên tiếp, huyết áp có xu hướng tăng, sụt cân — khi chấp nhận một dấu hiệu, hệ thống gợi ý một buổi thăm hỏi.",
+      "08-care-plans":"Kế hoạch chăm sóc, cùng nhật ký thăm hỏi 30 giây phía sau mỗi lần nâng mức quan tâm.",
+      "09-club-profile":"Hồ sơ câu lạc bộ — nơi in ra sổ thành viên và sổ theo dõi sức khỏe.",
+      "10-daycare-day-board":"Bảng theo dõi ngày của trung tâm — chưa đến · đang ở trung tâm · đã về · vắng: một cái liếc là nắm cả ngày.",
+      "11-daycare-enrolments":"Danh sách ghi danh ban ngày — cột xanh “là thành viên CLB?”: một người cao tuổi, hai dịch vụ, một hồ sơ.",
+      "12-enrolment-safety":"Dải an toàn màu đỏ nêu việc nhân viên phải làm — không nêu bệnh của một người; kèm theo ai được phép đón về.",
+      "13-centre-kpis":"Số liệu trung tâm: người đến đều, lượt trong 30 ngày, độ bao phủ (số liệu minh họa).",
+      "15-province-aggregates":"Góc nhìn cấp tỉnh: chỉ số liệu tổng hợp, không có hồ sơ thành viên — quyền nhìn thấy đến từ mối quan hệ, không do vai trò ban phát.",
+      "home":"Màn hình chính của chị Hoa: buổi sinh hoạt kế tiếp, thao tác nhanh, và danh sách cần quan tâm.",
+      "members":"Sổ thành viên, gọn trong túi.",
+      "attendance":"Điểm danh hai chạm: tạo danh sách, rồi chạm vào những người vắng.",
+      "vitals":"Chỉ số buổi sinh hoạt — huyết áp và cân nặng nhập ngay tại chỗ.",
+      "attention":"Cần quan tâm trên điện thoại — cùng những dấu hiệu như trên máy tính.",
+      "visit-sheet":"Phiếu thăm hỏi 30 giây: tích các việc cần làm, một dòng ghi nhận, xong.",
+      "books":"Các quyển sổ của câu lạc bộ, ngay trong ứng dụng.",
+      "book-preview":"Xem trước sổ thành viên kèm xuất PDF — vẫn in ra được.",
+      "station-idle":"Màn hình chờ: ngày dương và ngày âm, một nút lớn để bắt đầu.",
+      "station-identify":"“Xin chạm vào tên của cụ” — xưng hô đúng mực (Ông/Bà/Cụ), tìm kiếm không dấu, hoặc mã QR thành viên.",
+      "station-hub":"Chào Ông An: ba việc, ba nút lớn — điểm danh, đo sức khỏe, đăng ký.",
+      "station-measure":"Máy đo huyết áp và cân đã kết nối tự động ghi số — bản demo dùng trình mô phỏng có ghi nhãn rõ ràng.",
+      "station-reading":"Kết quả hiện ra bằng chữ to — được xác nhận trên màn hình trước khi lưu bất cứ điều gì.",
+      "station-saved":"Đã lưu vào sổ theo dõi sức khỏe, in một phiếu mang về, và trạm mời người kế tiếp.",
+      "welcome":"Màn hình chào — dành cho con cháu ở xa.",
+      "feed":"Dòng tin: “Mẹ vẫn khỏe” trước, rồi đến những khoảnh khắc trong ngày.",
+      "feed-quiet":"Một ngày bình lặng vẫn là tin vui — ứng dụng nói rõ điều đó.",
+      "photo-hearted":"Thả tim cho một khoảnh khắc — sự kết nối, không phải giám sát.",
+      "wellbeing":"Tuần của mẹ: hoạt động và tâm trạng — không một con số y tế nào.",
+      "family-digest":"Bản tin ngày qua Zalo không cần đăng nhập: đến nơi, bữa trưa, giấc ngủ trưa — không có dữ liệu sức khỏe. Liên kết hết hạn sau 7 ngày, chỉ dành cho gia đình.",
+      "senior-home":"Chữ to, thao tác rõ ràng: một chạm — “Tôi sẽ đến” — cho buổi kế tiếp.",
+      "health":"Sức khỏe của tôi: chỉ số của chính cụ, đúng như trong sổ giấy của câu lạc bộ.",
+      "messages":"Tin nhắn từ câu lạc bộ — những lời nhắc quen thuộc, không thuật ngữ khó hiểu.",
+      "profile":"Hồ sơ của tôi — gọn, dễ đọc, nhẹ nhàng.",
+      "link":"Liên kết bằng mã sáu chữ số do chủ nhiệm câu lạc bộ đọc lên — không mật khẩu, luôn là tùy chọn."
+    },
+    print:{title:"“Vẫn in ra được” — quyển sổ giấy không bao giờ biến mất",blurb:"Mọi hồ sơ số đều in ra thành quyển sổ đúng mẫu quen thuộc: những gì trên màn hình cũng có trên giấy. Ứng dụng không thay thế quyển sổ — nó điền vào quyển sổ.",items:{"so-thanh-vien":"Sổ thành viên — diện hoàn cảnh khó khăn và BHYT","so-theo-doi-suc-khoe":"Sổ theo dõi sức khỏe — huyết áp và cân nặng qua các tháng","so-diem-danh-ngay":"Sổ điểm danh ngày sẵn sàng cho kiểm tra — dòng an toàn và cột thuốc","bao-cao-thang":"So sánh tháng này với tháng trước — “báo cáo tự viết ra”"}},
+    manuals:{title:"Hướng dẫn sử dụng cho từng kênh",blurb:"Mỗi kênh một quyển hướng dẫn — tiếng Việt trước, tiếng Anh song song, sẵn sàng in khổ A4. Hướng dẫn cổng quản trị phản chiếu đúng các trang Hướng dẫn ngay trong ứng dụng.",items:{"01-cong-quan-tri":"Chín phần — phản chiếu đúng hướng dẫn trong ứng dụng","02-ung-dung-nhan-vien":"Điểm danh, chỉ số, phiếu thăm hỏi, các quyển sổ","03-tram-sinh-hoat":"Cài đặt, luồng tự phục vụ, bảo mật của trạm","04-gia-dinh":"Ứng dụng và bản tin Zalo không cần đăng nhập","05-nguoi-cao-tuoi":"Chữ to, mã sáu chữ số, luôn là tùy chọn"}},
+    closing:{h1:"Năm kênh, một kỷ luật dữ liệu",principles:[
+      {b:"Sự đồng ý là một bản ghi hạng nhất",span:"Các trang gia đình không hiển thị nếu chưa có sự đồng ý; khi rút lại, những liên kết đã chia sẻ cũng lập tức mất hiệu lực."},
+      {b:"Mức quan tâm, không bao giờ là chẩn đoán",span:"Không có ô ghi bệnh, không có điểm số; thông tin an toàn được viết dưới dạng hướng dẫn cho nhân viên. Thuốc chỉ là một nhật ký nhắc uống."},
+      {b:"Mỗi kênh chỉ thấy đúng phần của mình",span:"Gia đình: không dữ liệu sức khỏe. Tình nguyện viên: chỉ phần việc được giao. Trạm: tự làm mới sau 45 giây. Cấp tỉnh: chỉ số liệu tổng hợp."},
+      {b:"Một cửa duy nhất vào dữ liệu",span:"Các ứng dụng đều đi qua cổng kết nối với phiên riêng cho từng người — quyền truy cập do hệ thống lõi quyết định."}
+    ]}
+  };
+  const T={vi:{numbers:"Số liệu",statsH1:"Quy mô vận hành",stat1:"lượt điểm danh mỗi ngày (chủ yếu qua kiosk tự phục vụ)",stat2:"người cao tuổi",stat3:"hoạt động",stat4:"các Trung tâm Sinh hoạt NCT ở Singapore dùng CaritaHub",illustrative:"Số liệu minh họa.",whereRuns:"Nơi đang vận hành",geoH1:"Ba quốc gia, một nền tảng",sg1:"Trung tâm Sinh hoạt NCT",daycare:"chăm sóc ban ngày",homecare:"chăm sóc tại nhà",nursing:"viện dưỡng lão",id1:"nhà ở dưỡng lão",id2:"câu lạc bộ NCT",vn1:"câu lạc bộ",scanTitle:"Quét để mở trên điện thoại",overview:"Tổng quan",ovTitle:"Tổng quan — chuyển tới một phần",search:"Tìm màn hình…",tapZoom:"Chạm để phóng to",manual:"Xem hướng dẫn (PDF)",seeScreens:"Chạm → để xem từng màn hình",printKick:"Bản in",manualsKick:"Hướng dẫn",screens:"màn hình",section:"phần"}};
+  const PR_EN=[
+    {b:"Consent is a first-class record",span:"Family pages refuse to render without consent; withdrawing it kills links already shared."},
+    {b:"Attention levels, never diagnosis",span:"No condition fields, no scores; safety info is written as staff instructions. Medication is a reminder log."},
+    {b:"Each channel sees exactly its share",span:"Family: no health data. Volunteers: only assigned work. Station resets after 45s. Province: aggregates only."},
+    {b:"One door into the data",span:"Apps go through the gateway with per-user sessions — access is decided by the core system."}
+  ];
+  const NAMEVI={"Intro":"Giới thiệu","Numbers":T.vi.numbers,"Where it runs":T.vi.whereRuns,"Print":T.vi.printKick,"Manuals":T.vi.manualsKick,"Principles":"Nguyên tắc"};
+  let LANG='en'; try{LANG=localStorage.getItem('clbLang')||'en';}catch(e){}
+  function tc(en,vi){return (LANG==='vi'&&vi!=null&&vi!=='')?vi:en;}
+  function L(en,key){return (LANG==='vi'&&T.vi&&T.vi[key]!=null)?T.vi[key]:en;}
+  function vch(id){return (LANG==='vi'&&VI.chapters&&VI.chapters[id])?VI.chapters[id]:{};}
+  function cn(name,id){if(LANG!=='vi')return name;if(id&&VI.chapters&&VI.chapters[id])return VI.chapters[id].kick;return NAMEVI[name]||name;}
+
+  /* ==================== count-up for stats ==================== */
+  function animateStats(){
+    const nums=deck.querySelectorAll('.stat-num');
+    const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    nums.forEach(el=>{const target=parseFloat(el.dataset.target)||0,suffix=el.dataset.suffix||'';
+      if(reduce){el.textContent=target+suffix;return;}
+      const dur=900,start=performance.now();
+      (function tick(now){const p=Math.min(1,(now-start)/dur),e=1-Math.pow(1-p,3);
+        el.textContent=Math.round(e*target)+suffix;if(p<1)requestAnimationFrame(tick);})(performance.now());});
+  }
+
+  /* ==================== deep-linking (hash → step) ==================== */
+  function updateHash(){try{history.replaceState(null,'','#s'+deckIdx);}catch(e){}}
+  function fromHash(){const m=(location.hash||'').match(/^#s(\d+)$/);if(m){const i=+m[1];if(i>=0&&i<STEPS.length){if(posterActive)switchTab('app');deckJump(i);return true;}}return false;}
+  window.addEventListener('hashchange',()=>{if(!posterActive)fromHash();});
+
+  /* ==================== attract mode + idle reset ==================== */
+  let attractT=null,autoT=null,attracting=false;const IDLE_MS=45000,AUTO_MS=9000;
+  function stopAuto(){attracting=false;clearInterval(autoT);autoT=null;}
+  function startAuto(){if(posterActive)return;attracting=true;autoT=setInterval(()=>{if(document.hidden)return;deckJump(deckIdx>=STEPS.length-1?0:deckIdx+1);},AUTO_MS);}
+  function deckIdle(){clearTimeout(attractT);if(attracting)stopAuto();if(!posterActive)attractT=setTimeout(startAuto,IDLE_MS);}
+  ['pointerdown','keydown','wheel','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{if(attracting)stopAuto();deckIdle();},{passive:true}));
+
+  /* ==================== wake lock (keep screen on) ==================== */
+  let wakeLock=null;
+  async function reqWake(){try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');}}catch(e){}}
+  reqWake();document.addEventListener('visibilitychange',()=>{if(!document.hidden)reqWake();});
+
+  /* ==================== inline PDF viewer (same-origin books) ==================== */
+  const pdfv=document.getElementById('pdfview'),pvFrame=document.getElementById('pv-frame'),pvTitle=document.getElementById('pv-title');
+  document.addEventListener('click',e=>{const a=e.target.closest('.lcard');if(!a)return;const href=a.getAttribute('href');
+    if(href&&href.indexOf('assets/')===0){e.preventDefault();pvTitle.textContent=(a.querySelector('h4')&&a.querySelector('h4').textContent)||'PDF';pvFrame.src=href;pdfv.classList.add('open');}});
+  function pdfClose(){pdfv.classList.remove('open');pvFrame.src='about:blank';}
+  document.getElementById('pv-x').onclick=pdfClose;
+  pdfv.addEventListener('click',e=>{if(e.target===pdfv)pdfClose();});
+
+  /* ==================== search in overview ==================== */
+  const ovSearch=document.getElementById('ov-search'),ovResults=document.getElementById('ov-results');
+  const searchIdx=STEPS.map((s,i)=>({i,s})).filter(o=>o.s.type==='screen').map(o=>({i:o.i,ch:o.s.chapter,chId:o.s.chId,cap:o.s.cap,file:o.s.file}));
+  function renderSearch(q){q=(q||'').trim().toLowerCase();if(!q){ovResults.innerHTML='';ovGrid.style.display='';return;}ovGrid.style.display='none';
+    const hits=searchIdx.filter(o=>o.cap.toLowerCase().indexOf(q)>=0||o.ch.toLowerCase().indexOf(q)>=0||((VI.caps[o.file]||'').toLowerCase().indexOf(q)>=0)).slice(0,14);
+    ovResults.innerHTML=hits.length?hits.map(o=>'<div class="ov-res" data-i="'+o.i+'"><div class="r-ch">'+cn(o.ch,o.chId)+'</div><div class="r-cap">'+esc(tc(o.cap,VI.caps[o.file]))+'</div></div>').join(''):'<div style="text-align:center;color:var(--muted);padding:20px">—</div>';
+    ovResults.querySelectorAll('.ov-res').forEach(r=>r.onclick=()=>{deckJump(+r.dataset.i);ov.classList.remove('open');ovSearch.value='';renderSearch('');});}
+  ovSearch.addEventListener('input',()=>renderSearch(ovSearch.value));
+
+  /* ==================== language toggle ==================== */
+  const langBtn=document.getElementById('langBtn');
+  function applyLang(){
+    document.documentElement.lang=(LANG==='vi'?'vi':'en');
+    langBtn.innerHTML=LANG==='vi'?'EN · <b>VI</b>':'<b>EN</b> · VI';
+    const os=document.querySelector('#dk-ov span');if(os)os.textContent=L('Overview','overview');
+    const ot=document.getElementById('ov-title');if(ot)ot.textContent=LANG==='vi'?T.vi.ovTitle:'Overview — jump to a section';
+    if(ovSearch)ovSearch.placeholder=L('Search screens…','search');
+    buildOverview();if(!posterActive)renderDeck();
+  }
+  langBtn.onclick=()=>{LANG=(LANG==='vi'?'en':'vi');try{localStorage.setItem('clbLang',LANG);}catch(e){}applyLang();};
+
+  /* ==================== service worker (offline PWA) ==================== */
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+    window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});});
+  }
+
+  /* ==================== init ==================== */
+  applyLang();
+  if(!fromHash()){/* stay on poster */}
+  deckIdle();
   </script>
 </body>
 </html>
