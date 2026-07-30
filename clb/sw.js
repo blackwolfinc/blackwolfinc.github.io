@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'clb-v4';
+const CACHE_NAME = 'clb-v5';
 
 /* App shell + icons/QR + background music */
 const SHELL = [
@@ -46,6 +46,7 @@ const APP = [
   './app/link.webp',
   './app/members.webp',
   './app/messages.webp',
+  './app/partners.webp',
   './app/photo-hearted.webp',
   './app/profile.webp',
   './app/senior-home.webp',

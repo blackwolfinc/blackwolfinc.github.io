@@ -272,6 +272,12 @@
     .geo-list{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
     .geo-list li{display:flex;align-items:center;gap:9px;font-size:13.5px;color:#4b5563;line-height:1.4}
     .geo-list li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--line);flex:0 0 auto}
+    /* ---- partners ---- */
+    .step-partners{text-align:center}
+    .step-partners h1{font-size:clamp(24px,4vw,42px);color:var(--brand);letter-spacing:-.02em;line-height:1.1;margin:14px auto 0;max-width:820px}
+    .partners-img{max-width:min(1040px,94vw);margin:26px auto 0;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#fff}
+    .partners-img img{display:block;width:100%;height:auto}
+    @media (min-width:900px){.step-partners h1{font-size:clamp(38px,5vw,54px)}}
     /* ---- closing scan card ---- */
     .close-scan{display:flex;align-items:center;justify-content:center;gap:clamp(18px,3vw,30px);flex-wrap:wrap;
       background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
@@ -620,6 +626,8 @@
   STEPS.push({type:'stats',chapter:'Numbers',accent:'#2f6df6'});
   CH.push({name:'Where it runs',no:'',accent:'#2f6df6',start:STEPS.length});
   STEPS.push({type:'geo',chapter:'Where it runs',accent:'#2f6df6'});
+  CH.push({name:'Partners',no:'',accent:'#2f6df6',start:STEPS.length});
+  STEPS.push({type:'partners',chapter:'Partners',accent:'#2f6df6'});
   CH.push({name:'Print',no:'06',accent:'#64748b',start:STEPS.length});
   STEPS.push({type:'links',no:'06',kick:'Print',accent:'#64748b',chapter:'Print',
     title:'“It still prints” — the paper book never goes away',
@@ -700,6 +708,10 @@
         '<div class="geo-card"><div class="geo-head"><span class="geo-dot" style="background:#159a6b"></span>Indonesia</div><ul class="geo-list"><li>'+L('senior living','id1')+'</li><li>'+L('senior clubs','id2')+'</li><li>'+L('home care','homecare')+'</li><li>'+L('nursing homes','nursing')+'</li></ul></div>'+
         '<div class="geo-card"><div class="geo-head"><span class="geo-dot" style="background:#d1543f"></span>Vietnam</div><ul class="geo-list"><li>'+L('clubs','vn1')+'</li><li>'+L('day care','daycare')+'</li></ul></div>'+
         '</div></div>';
+    if(s.type==='partners')
+      return '<div class="step step-partners" style="--ch:'+s.accent+'"><div class="kick"><i></i><span>'+L('Partners','partnersKick')+'</span></div>'+
+        '<h1>'+L('Trusted for 10+ years','partnersH1')+'</h1>'+
+        '<div class="partners-img"><img src="app/partners.webp" alt="'+L('Partner organisations across Singapore','partnersAlt')+'"></div></div>';
     return '';
   }
   function renderDeck(){
@@ -850,14 +862,14 @@
       {b:"Một cửa duy nhất vào dữ liệu",span:"Các ứng dụng đều đi qua cổng kết nối với phiên riêng cho từng người — quyền truy cập do hệ thống lõi quyết định."}
     ]}
   };
-  const T={vi:{numbers:"Số liệu",statsH1:"Quy mô vận hành",stat1:"lượt điểm danh mỗi ngày (chủ yếu qua kiosk tự phục vụ)",stat2:"người cao tuổi",stat3:"hoạt động",stat4:"các Trung tâm Sinh hoạt NCT ở Singapore dùng CaritaHub",illustrative:"Số liệu minh họa.",whereRuns:"Nơi đang vận hành",geoH1:"Ba quốc gia, một nền tảng",sg1:"Trung tâm Sinh hoạt NCT",daycare:"chăm sóc ban ngày",homecare:"chăm sóc tại nhà",nursing:"viện dưỡng lão",id1:"nhà ở dưỡng lão",id2:"câu lạc bộ NCT",vn1:"câu lạc bộ",scanTitle:"Quét để mở trên điện thoại",overview:"Tổng quan",ovTitle:"Tổng quan — chuyển tới một phần",search:"Tìm màn hình…",tapZoom:"Chạm để phóng to",manual:"Xem hướng dẫn (PDF)",seeScreens:"Chạm → để xem từng màn hình",printKick:"Bản in",manualsKick:"Hướng dẫn",screens:"màn hình",section:"phần"}};
+  const T={vi:{numbers:"Số liệu",statsH1:"Quy mô vận hành",stat1:"lượt điểm danh mỗi ngày (chủ yếu qua kiosk tự phục vụ)",stat2:"người cao tuổi",stat3:"hoạt động",stat4:"các Trung tâm Sinh hoạt NCT ở Singapore dùng CaritaHub",illustrative:"Số liệu minh họa.",whereRuns:"Nơi đang vận hành",geoH1:"Ba quốc gia, một nền tảng",sg1:"Trung tâm Sinh hoạt NCT",daycare:"chăm sóc ban ngày",homecare:"chăm sóc tại nhà",nursing:"viện dưỡng lão",id1:"nhà ở dưỡng lão",id2:"câu lạc bộ NCT",vn1:"câu lạc bộ",scanTitle:"Quét để mở trên điện thoại",overview:"Tổng quan",ovTitle:"Tổng quan — chuyển tới một phần",search:"Tìm màn hình…",tapZoom:"Chạm để phóng to",manual:"Xem hướng dẫn (PDF)",seeScreens:"Chạm → để xem từng màn hình",printKick:"Bản in",manualsKick:"Hướng dẫn",screens:"màn hình",section:"phần",partnersKick:"Đối tác",partnersH1:"Hơn 10 năm được tin cậy",partnersAlt:"Các tổ chức đối tác tại Singapore"}};
   const PR_EN=[
     {b:"Consent is a first-class record",span:"Family pages refuse to render without consent; withdrawing it kills links already shared."},
     {b:"Attention levels, never diagnosis",span:"No condition fields, no scores; safety info is written as staff instructions. Medication is a reminder log."},
     {b:"Each channel sees exactly its share",span:"Family: no health data. Volunteers: only assigned work. Station resets after 45s. Province: aggregates only."},
     {b:"One door into the data",span:"Apps go through the gateway with per-user sessions — access is decided by the core system."}
   ];
-  const NAMEVI={"Intro":"Giới thiệu","Numbers":T.vi.numbers,"Where it runs":T.vi.whereRuns,"Print":T.vi.printKick,"Manuals":T.vi.manualsKick,"Principles":"Nguyên tắc"};
+  const NAMEVI={"Intro":"Giới thiệu","Numbers":T.vi.numbers,"Where it runs":T.vi.whereRuns,"Partners":T.vi.partnersKick,"Print":T.vi.printKick,"Manuals":T.vi.manualsKick,"Principles":"Nguyên tắc"};
   let LANG='en'; try{LANG=localStorage.getItem('clbLang')||'en';}catch(e){}
   function tc(en,vi){return (LANG==='vi'&&vi!=null&&vi!=='')?vi:en;}
   function L(en,key){return (LANG==='vi'&&T.vi&&T.vi[key]!=null)?T.vi[key]:en;}
