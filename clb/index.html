@@ -75,7 +75,7 @@
     #stage{position:fixed;inset:0;z-index:10;overflow:hidden;cursor:pointer;
       background:radial-gradient(130% 100% at 50% 0%,#26262a 0%,#151517 46%,#000 100%);
       display:flex;align-items:center;justify-content:center}
-    .slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;
+    .slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;will-change:opacity;
       transition:opacity calc(var(--fade-ms)*1ms) ease-in-out;pointer-events:none;padding:clamp(8px,2.5vmin,40px)}
     .slide.active{opacity:1}
     .slide img{max-width:100%;max-height:100%;object-fit:contain;border-radius:clamp(4px,1.2vmin,14px);box-shadow:0 30px 80px rgba(0,0,0,.55)}
@@ -94,7 +94,7 @@
     #view-app.active{position:fixed;inset:0;z-index:10;background:#fbfbfd;overflow:hidden}
     #deck{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
       overflow:auto;touch-action:pan-y;padding:clamp(56px,7vh,84px) clamp(64px,9vw,120px)}
-    .step{width:100%;max-width:1120px;margin:auto;opacity:0;transform:translateY(10px);
+    .step{width:100%;max-width:1120px;margin:auto;opacity:0;transform:translateY(10px);will-change:opacity,transform;backface-visibility:hidden;
       transition:opacity .42s ease,transform .42s cubic-bezier(.4,0,.2,1)}
     .step.from-r{transform:translateX(36px)}
     .step.from-l{transform:translateX(-36px)}
@@ -668,8 +668,11 @@
     const s=STEPS[deckIdx];
     deck.innerHTML=stepHTML(s);
     deck.scrollTop=0;
-    const el=deck.firstElementChild;if(el)el.classList.add(deckDir<0?'from-l':'from-r');requestAnimationFrame(()=>el&&el.classList.add('in'));
-    var nx=STEPS[deckIdx+1];if(nx&&nx.type==='screen'){var im=new Image();im.src='app/'+nx.file+'.webp';}
+    const el=deck.firstElementChild;if(el)el.classList.add(deckDir<0?'from-l':'from-r');
+    const _im=el&&el.querySelector('img');
+    const _in=()=>requestAnimationFrame(()=>el&&el.classList.add('in'));
+    if(_im&&_im.decode){_im.decode().then(_in).catch(_in);}else _in();
+    var nx=STEPS[deckIdx+1];if(nx&&nx.type==='screen'){var im=new Image();im.src='app/'+nx.file+'.webp';if(im.decode)im.decode().catch(()=>{});}
     if(s.type==='stats')animateStats();
     if(typeof updateHash==='function')updateHash();
     if(typeof deckSchedule==='function')deckSchedule();
@@ -846,11 +849,12 @@
   const IC_PLAY2='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
   const IC_PAUSE2='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
   function modalOpen(){return lb.classList.contains('open')||ov.classList.contains('open')||pdfv.classList.contains('open');}
-  function runProg(){ if(!dkProg)return; dkProg.style.transition='none'; dkProg.style.width='0%';
-    if(deckAuto&&!posterActive&&!modalOpen()){ requestAnimationFrame(()=>{ dkProg.style.transition='width '+DECK_MS+'ms linear'; dkProg.style.width='100%'; }); } }
+  function stepMs(){ var s=STEPS[deckIdx]; return (s&&s.type!=='screen')?Math.round(DECK_MS*1.5):DECK_MS; }
+  function runProg(ms){ if(!dkProg)return; dkProg.style.transition='none'; dkProg.style.width='0%';
+    if(deckAuto&&!posterActive&&!modalOpen()){ requestAnimationFrame(()=>{ dkProg.style.transition='width '+ms+'ms linear'; dkProg.style.width='100%'; }); } }
   function deckSchedule(){ clearTimeout(deckTimer);
-    if(deckAuto&&!posterActive){ document.body.classList.add('autoplaying'); runProg();
-      deckTimer=setTimeout(function(){ if(document.hidden||modalOpen()){deckSchedule();return;} deckJump(deckIdx>=STEPS.length-1?0:deckIdx+1); },DECK_MS);
+    if(deckAuto&&!posterActive){ document.body.classList.add('autoplaying'); var ms=stepMs(); runProg(ms);
+      deckTimer=setTimeout(function(){ if(document.hidden||modalOpen()){deckSchedule();return;} deckJump(deckIdx>=STEPS.length-1?0:deckIdx+1); },ms);
     } else { document.body.classList.remove('autoplaying'); if(dkProg){dkProg.style.transition='none';dkProg.style.width='0%';} }
   }
   function deckIdle(){ deckSchedule(); } /* any interaction restarts the per-step timer */
@@ -991,6 +995,13 @@
   updatePlay();
   if(!fromHash()){/* stay on poster */}
   deckIdle();
+
+  /* warm every image (fetch + decode) when idle → instant, jank-free transitions */
+  (function(){ var idle=window.requestIdleCallback||function(f){return setTimeout(f,400);};
+    idle(function(){ try{
+      shots.forEach(function(sh){ var im=new Image(); im.src=sh.file; if(im.decode)im.decode().catch(function(){}); });
+      POSTERS.forEach(function(p){ var im=new Image(); im.src=p; if(im.decode)im.decode().catch(function(){}); });
+    }catch(e){} }); })();
   </script>
 </body>
 </html>
