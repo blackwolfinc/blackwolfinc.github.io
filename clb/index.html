@@ -336,6 +336,25 @@
       display:none;align-items:center;gap:8px;background:#1d1d1f;color:#fff;font-weight:700;font-size:12.5px;padding:9px 15px;border-radius:999px;opacity:.94}
     #offpill .dot{width:8px;height:8px;border-radius:50%;background:#febc2e}
     body.offline #offpill{display:flex}
+    /* first-run save-for-offline banner */
+    #dlbanner{position:fixed;left:50%;bottom:max(76px,calc(env(safe-area-inset-bottom) + 70px));transform:translateX(-50%) translateY(18px);
+      z-index:96;display:none;align-items:center;gap:12px;max-width:min(560px,94vw);
+      background:#fff;border:1px solid var(--line);border-radius:16px;padding:11px 11px 11px 15px;
+      box-shadow:0 18px 50px rgba(20,18,45,.22);opacity:0;transition:opacity .35s,transform .35s}
+    #dlbanner.show{display:flex;opacity:1;transform:translateX(-50%) translateY(0)}
+    #dlbanner .dlb-ic{width:38px;height:38px;border-radius:11px;background:#eef3ff;color:var(--brand2);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+    #dlbanner .dlb-ic svg{width:20px;height:20px}
+    #dlbanner .dlb-txt{display:flex;flex-direction:column;min-width:0}
+    #dlbanner .dlb-txt b{font-size:14px;color:var(--ink);white-space:nowrap}
+    #dlbanner .dlb-txt span{font-size:12px;color:var(--muted);white-space:nowrap}
+    #dlbanner .dlb-bar{width:120px;height:6px;border-radius:4px;background:var(--surface);overflow:hidden;display:none;flex:0 0 auto}
+    #dlbanner.busy .dlb-bar{display:block}
+    #dlbanner .dlb-bar i{display:block;height:100%;width:0;background:#28c840;transition:width .25s ease}
+    #dlbanner #dlb-go{appearance:none;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:13.5px;color:#fff;
+      background:var(--brand2);border-radius:11px;padding:11px 17px;white-space:nowrap;flex:0 0 auto}
+    #dlbanner.busy #dlb-go{display:none}
+    #dlbanner #dlb-x{appearance:none;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;width:32px;height:32px;flex:0 0 auto}
+    @media(max-width:520px){#dlbanner .dlb-txt span{display:none}#dlbanner{gap:9px;padding:9px 9px 9px 12px}#dlbanner .dlb-bar{width:80px}}
     @media (min-width:900px){#dk-play{width:52px;height:52px}#dk-play svg{width:24px;height:24px}}
     .icard:active,.lcard:active,.geo-card:active,.chan-cards .cc:active,.ov-card:active,.stat-tile:active{transform:scale(.985)}
     @media (prefers-reduced-motion: reduce){
@@ -407,6 +426,15 @@
   <!-- offline status -->
   <div id="offtoast"><span class="spin"></span><span class="dot"></span><span id="offtoast-txt"></span><span id="offtoast-bar"><i></i></span></div>
   <div id="offpill"><span class="dot"></span><span id="offpill-txt">Offline</span></div>
+
+  <!-- first-run: save-for-offline banner -->
+  <div id="dlbanner">
+    <div class="dlb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/></svg></div>
+    <div class="dlb-txt"><b id="dlb-title">Save for offline</b><span id="dlb-sub">Use with no internet</span></div>
+    <div class="dlb-bar"><i></i></div>
+    <button id="dlb-go">Save</button>
+    <button id="dlb-x" aria-label="Dismiss">&times;</button>
+  </div>
 
   <!-- inline PDF viewer -->
   <div id="pdfview"><div class="pv-bar"><b id="pv-title"></b><div class="pv-x" id="pv-x" role="button" tabindex="0" aria-label="Close PDF">&times;</div></div><iframe id="pv-frame" title="PDF"></iframe></div>
@@ -861,6 +889,7 @@
     const ot=document.getElementById('ov-title');if(ot)ot.textContent=LANG==='vi'?T.vi.ovTitle:'Overview — jump to a section';
     if(ovSearch)ovSearch.placeholder=L('Search screens…','search');
     if(typeof updateDlBtn==='function')updateDlBtn();
+    if(typeof dlbApplyLang==='function')dlbApplyLang();
     buildOverview();if(!posterActive)renderDeck();
   }
   langBtn.onclick=()=>{LANG=(LANG==='vi'?'en':'vi');try{localStorage.setItem('clbLang',LANG);}catch(e){}applyLang();};
@@ -877,8 +906,21 @@
     var ic=saved?'<path d="M20 6 9 17l-5-5"/>':'<path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/>';
     return '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px">'+ic+'</svg> '+t;}
   function updateDlBtn(){ let saved=false; try{saved=localStorage.getItem('clbOffline')==='1';}catch(e){} if(dlBtn){dlBtn.innerHTML=dlLabel(saved);dlBtn.classList.toggle('saved',saved);} }
-  function showOffProgress(pct){ if(!offToast)return; offToast.classList.add('show','downloading'); offToast.classList.remove('ready'); offTxt.textContent=om('saving')+' '+pct+'%'; if(offBar)offBar.style.width=pct+'%'; }
-  function markOfflineReady(){ try{localStorage.setItem('clbOffline','1');}catch(e){} if(offToast)offToast.classList.remove('downloading'); if(showedSaving){showOff(om('ready'),true,3600);showedSaving=false;} updateDlBtn(); }
+  /* first-run save-for-offline banner */
+  const dlb=document.getElementById('dlbanner'),dlbTitle=document.getElementById('dlb-title'),dlbSub=document.getElementById('dlb-sub'),dlbBar=document.querySelector('#dlbanner .dlb-bar i'),dlbGo=document.getElementById('dlb-go'),dlbX=document.getElementById('dlb-x');
+  const bMsg={title:{en:'Save for offline',vi:'Lưu để dùng ngoại tuyến'},sub:{en:'Use with no internet',vi:'Dùng khi không có mạng'},go:{en:'Save',vi:'Lưu'},saving:{en:'Saving…',vi:'Đang lưu…'},ready:{en:'Ready — works offline ✓',vi:'Sẵn sàng — dùng ngoại tuyến ✓'}};
+  function bm(k){return bMsg[k][LANG==='vi'?'vi':'en'];}
+  function dlbApplyLang(){ if(!dlb)return; if(!dlb.classList.contains('busy')){dlbTitle.textContent=bm('title');dlbSub.textContent=bm('sub');} if(dlbGo)dlbGo.textContent=bm('go'); }
+  function dlbHide(){ if(dlb)dlb.classList.remove('show'); }
+  function dlbShow(){ if(!dlb)return; let saved=false,dis=false; try{saved=localStorage.getItem('clbOffline')==='1';dis=localStorage.getItem('clbOfflineDismiss')==='1';}catch(e){} if(saved||dis)return; dlbApplyLang(); dlb.classList.add('show'); }
+  if(dlbGo)dlbGo.onclick=()=>{ dlb.classList.add('busy'); dlbTitle.textContent=bm('saving'); dlbSub.textContent='0%'; downloadOffline(); };
+  if(dlbX)dlbX.onclick=()=>{ dlbHide(); try{localStorage.setItem('clbOfflineDismiss','1');}catch(e){} };
+  function showOffProgress(pct){
+    if(dlb&&dlb.classList.contains('busy')){ dlbTitle.textContent=bm('saving'); dlbSub.textContent=pct+'%'; if(dlbBar)dlbBar.style.width=pct+'%'; return; }
+    if(!offToast)return; offToast.classList.add('show','downloading'); offToast.classList.remove('ready'); offTxt.textContent=om('saving')+' '+pct+'%'; if(offBar)offBar.style.width=pct+'%'; }
+  function markOfflineReady(){ try{localStorage.setItem('clbOffline','1');}catch(e){} updateDlBtn();
+    if(dlb&&dlb.classList.contains('show')){ dlb.classList.remove('busy'); dlbTitle.textContent=bm('ready'); dlbSub.textContent=''; if(dlbBar)dlbBar.style.width='100%'; setTimeout(dlbHide,1900); if(offToast)offToast.classList.remove('show','downloading'); showedSaving=false; return; }
+    if(offToast)offToast.classList.remove('downloading'); if(showedSaving){showOff(om('ready'),true,3600);showedSaving=false;} }
   function downloadOffline(){ if(!('serviceWorker' in navigator))return; showedSaving=true; showOffProgress(0);
     navigator.serviceWorker.ready.then(reg=>{ const w=reg.active||navigator.serviceWorker.controller; if(w)w.postMessage({type:'cache-all'}); }).catch(()=>{}); }
   if(dlBtn)dlBtn.onclick=downloadOffline;
@@ -888,7 +930,7 @@
       if(d.type==='cache-progress'){ showOffProgress(Math.round(d.done/d.total*100)); }
       else if(d.type==='offline-ready'){ markOfflineReady(); } });
     window.addEventListener('load',()=>{
-      if(!navigator.serviceWorker.controller && !savedOffline){ showedSaving=true; showOff(om('saving'),false,0); }
+      if(!savedOffline){ dlbShow(); }
       navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(()=>{
         const w=navigator.serviceWorker.controller; if(w)w.postMessage({type:'offline-check'});
       }).catch(()=>{ if(showedSaving&&offToast)offToast.classList.remove('show'); });
