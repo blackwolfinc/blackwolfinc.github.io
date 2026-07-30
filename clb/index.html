@@ -363,6 +363,28 @@
       *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important;scroll-behavior:auto !important}
     }
 
+    /* settings panel */
+    #settings{position:fixed;inset:0;z-index:115;background:rgba(15,13,30,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
+    #settings.open{display:flex}
+    .set-card{background:#fff;border-radius:22px;width:min(460px,94vw);max-height:90vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4);padding:6px}
+    .set-head{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px}
+    .set-head b{font-size:18px;color:var(--brand)}
+    .set-x{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:26px;color:var(--muted)}
+    .set-x:hover{background:var(--surface)}
+    .set-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 16px;border-top:1px solid var(--line)}
+    .set-row>span{font-size:14.5px;font-weight:600;color:var(--ink)}
+    .tgl{width:48px;height:29px;border-radius:999px;background:var(--line);border:0;position:relative;cursor:pointer;transition:.2s;flex:0 0 auto}
+    .tgl::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+    .tgl.on{background:var(--brand2)}.tgl.on::after{left:22px}
+    .seg{display:flex;gap:3px;background:var(--surface);border-radius:999px;padding:3px;flex:0 0 auto}
+    .seg button{border:0;background:transparent;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;color:var(--muted);padding:7px 13px;border-radius:999px;transition:.15s}
+    .seg button.on{background:#fff;color:var(--brand);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+    .setbtn2{border:1px solid #dbe6ff;background:#eef3ff;color:var(--brand2);font-weight:700;font-size:13px;border-radius:11px;padding:10px 15px;cursor:pointer;font-family:inherit}
+    .setbtn2.saved{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+    /* page-animation OFF */
+    body.noanim .step{transition:opacity .12s linear!important}
+    body.noanim .step.from-r,body.noanim .step.from-l{transform:none}
+
     /* lightbox */
     #lb{position:fixed;inset:0;z-index:130;background:rgba(15,13,30,.93);display:none;align-items:center;justify-content:center;padding:22px}
     #lb.open{display:flex}
@@ -380,6 +402,7 @@
     <div class="tbrow">
       <div class="brand"><img src="assets/ch-logo.svg" alt="" style="height:24px"><span>Sổ <b>CLB</b> số</span></div>
       <div class="spacer"></div>
+      <button class="iconbtn" id="setBtn" title="Cài đặt / Settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></button>
       <button class="langtog" id="dlBtn" title="Unduh untuk offline / Save for offline" aria-label="Download for offline"></button>
       <button class="langtog" id="langBtn" title="Ngôn ngữ / Language" aria-label="Toggle language English or Vietnamese"><b>EN</b> · VI</button>
       <button class="iconbtn" id="fsBtn" title="Fullscreen" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
@@ -436,6 +459,19 @@
     <div class="dlb-bar"><i></i></div>
     <button id="dlb-go">Save</button>
     <button id="dlb-x" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <!-- settings panel -->
+  <div id="settings" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="set-card">
+      <div class="set-head"><b id="set-title">Settings</b><div class="set-x" id="set-x" role="button" tabindex="0" aria-label="Close">&times;</div></div>
+      <div class="set-row"><span id="set-lang-l">Language</span><div class="seg" id="set-lang"><button data-v="en">EN</button><button data-v="vi">VI</button></div></div>
+      <div class="set-row"><span id="set-auto-l">Auto-play</span><button class="tgl" id="set-auto" role="switch" aria-label="Auto-play"></button></div>
+      <div class="set-row"><span id="set-speed-l">Speed</span><div class="seg" id="set-speed"><button data-v="6000">6s</button><button data-v="8500">8s</button><button data-v="11000">11s</button></div></div>
+      <div class="set-row"><span id="set-anim-l">Page animation</span><button class="tgl" id="set-anim" role="switch" aria-label="Page animation"></button></div>
+      <div class="set-row"><span id="set-music-l">Music</span><button class="tgl" id="set-music" role="switch" aria-label="Music"></button></div>
+      <div class="set-row"><span id="set-off-l">Offline</span><button class="setbtn2" id="set-offline">Save offline</button></div>
+    </div>
   </div>
 
   <!-- inline PDF viewer -->
@@ -896,6 +932,7 @@
     if(ovSearch)ovSearch.placeholder=L('Search screens…','search');
     if(typeof updateDlBtn==='function')updateDlBtn();
     if(typeof dlbApplyLang==='function')dlbApplyLang();
+    if(typeof settingsApplyLang==='function')settingsApplyLang();
     buildOverview();if(!posterActive)renderDeck();
   }
   langBtn.onclick=()=>{LANG=(LANG==='vi'?'en':'vi');try{localStorage.setItem('clbLang',LANG);}catch(e){}applyLang();};
@@ -963,6 +1000,30 @@
   sndBtn.onclick=()=>{ bgmMuted=!bgmMuted; try{localStorage.setItem('clbMuted',bgmMuted?'1':'0');}catch(e){} if(!bgmMuted)userGesture=true; updateBGM(); };
   document.addEventListener('pointerdown',()=>{ if(!userGesture){userGesture=true; updateBGM();} },{once:true});
   document.addEventListener('visibilitychange',()=>{updateBGM();if(!document.hidden&&!posterActive)deckSchedule();});
+
+  /* ==================== settings panel ==================== */
+  const setEl=document.getElementById('settings'),setBtn=document.getElementById('setBtn');
+  let animOn=true; try{animOn=localStorage.getItem('clbAnim')!=='0';}catch(e){}
+  try{var _sp=parseInt(localStorage.getItem('clbSpeed'),10); if(_sp>=2000&&_sp<=60000)DECK_MS=_sp;}catch(e){}
+  document.body.classList.toggle('noanim',!animOn);
+  const setTxt={title:{en:'Settings',vi:'Cài đặt'},lang:{en:'Language',vi:'Ngôn ngữ'},auto:{en:'Auto-play',vi:'Tự động chạy'},speed:{en:'Speed',vi:'Tốc độ'},anim:{en:'Page animation',vi:'Hiệu ứng lật trang'},music:{en:'Music',vi:'Nhạc nền'},off:{en:'Offline',vi:'Ngoại tuyến'},save:{en:'Save offline',vi:'Lưu offline'},saved:{en:'Saved ✓',vi:'Đã lưu ✓'}};
+  function st(k){return setTxt[k][LANG==='vi'?'vi':'en'];}
+  function setToggle(id,on){var b=document.getElementById(id);if(b)b.classList.toggle('on',!!on);}
+  function setSeg(wrapId,val){var w=document.getElementById(wrapId);if(!w)return;w.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.v===String(val));});}
+  function reflectSettings(){ setSeg('set-lang',LANG); setToggle('set-auto',deckAuto); setSeg('set-speed',DECK_MS); setToggle('set-anim',animOn); setToggle('set-music',!bgmMuted);
+    var saved=false;try{saved=localStorage.getItem('clbOffline')==='1';}catch(e){} var ob=document.getElementById('set-offline'); if(ob){ob.textContent=saved?st('saved'):st('save');ob.classList.toggle('saved',saved);} }
+  function settingsApplyLang(){ document.getElementById('set-title').textContent=st('title'); document.getElementById('set-lang-l').textContent=st('lang'); document.getElementById('set-auto-l').textContent=st('auto'); document.getElementById('set-speed-l').textContent=st('speed'); document.getElementById('set-anim-l').textContent=st('anim'); document.getElementById('set-music-l').textContent=st('music'); document.getElementById('set-off-l').textContent=st('off'); reflectSettings(); }
+  function openSettings(){ settingsApplyLang(); setEl.classList.add('open'); }
+  function closeSettings(){ setEl.classList.remove('open'); }
+  if(setBtn)setBtn.onclick=openSettings;
+  document.getElementById('set-x').onclick=closeSettings;
+  setEl.addEventListener('click',function(e){if(e.target===setEl)closeSettings();});
+  document.getElementById('set-lang').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;LANG=b.dataset.v;try{localStorage.setItem('clbLang',LANG);}catch(_){} applyLang();});
+  document.getElementById('set-auto').onclick=function(){deckAuto=!deckAuto;try{localStorage.setItem('clbDeckAuto',deckAuto?'1':'0');}catch(_){} if(typeof updatePlay==='function')updatePlay(); deckSchedule(); reflectSettings();};
+  document.getElementById('set-speed').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;DECK_MS=parseInt(b.dataset.v,10);try{localStorage.setItem('clbSpeed',String(DECK_MS));}catch(_){} deckSchedule(); reflectSettings();});
+  document.getElementById('set-anim').onclick=function(){animOn=!animOn;try{localStorage.setItem('clbAnim',animOn?'1':'0');}catch(_){} document.body.classList.toggle('noanim',!animOn); reflectSettings();};
+  document.getElementById('set-music').onclick=function(){bgmMuted=!bgmMuted;try{localStorage.setItem('clbMuted',bgmMuted?'1':'0');}catch(_){} if(!bgmMuted)userGesture=true; updateBGM(); reflectSettings();};
+  document.getElementById('set-offline').onclick=function(){ if(typeof downloadOffline==='function')downloadOffline(); };
 
   /* ==================== enhancements: haptics, lightbox gestures, idle-home, URL config ==================== */
   function hap(){try{if(navigator.vibrate)navigator.vibrate(8);}catch(e){}}
