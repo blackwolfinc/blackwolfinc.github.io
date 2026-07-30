@@ -93,12 +93,14 @@
     /* ===== APP DECK (kiosk step-by-step) ===== */
     #view-app.active{position:fixed;inset:0;z-index:10;background:#fbfbfd;overflow:hidden}
     #deck{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-      overflow:auto;touch-action:pan-y;padding:clamp(56px,7vh,84px) clamp(64px,9vw,120px)}
-    .step{width:100%;max-width:1120px;margin:auto;opacity:0;transform:translateY(10px);will-change:opacity,transform;backface-visibility:hidden;
-      transition:opacity .42s ease,transform .42s cubic-bezier(.4,0,.2,1)}
-    .step.from-r{transform:translateX(36px)}
-    .step.from-l{transform:translateX(-36px)}
+      overflow:auto;touch-action:pan-y;padding:clamp(56px,7vh,84px) clamp(64px,9vw,120px);perspective:1800px;perspective-origin:center}
+    .step{width:100%;max-width:1120px;margin:auto;opacity:0;transform:translateY(10px);will-change:opacity,transform;backface-visibility:hidden;transform-style:preserve-3d;
+      transition:opacity .5s ease,transform .55s cubic-bezier(.33,0,.2,1)}
+    /* page-turn / paper-fold: new page swings in from its leading edge */
+    .step.from-r{transform-origin:right center;transform:rotateY(-28deg) translateX(52px) scale(.985)}
+    .step.from-l{transform-origin:left center;transform:rotateY(28deg) translateX(-52px) scale(.985)}
     .step.in{opacity:1;transform:none!important}
+    @media (prefers-reduced-motion: reduce){.step.from-r,.step.from-l{transform:none}}
 
     /* intro */
     .ch-logo{height:clamp(38px,5.2vh,56px);display:block;margin:0 auto 22px;width:auto;max-width:min(80vw,340px)}
