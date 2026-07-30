@@ -119,14 +119,35 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
-// Allow a page to ask whether offline is ready.
+// Page messages: offline-check (status) and cache-all (explicit download with progress).
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'offline-check') {
+  const data = event.data || {};
+  const src = event.source;
+
+  if (data.type === 'offline-check') {
     event.waitUntil((async () => {
       const cache = await caches.open(CACHE_NAME);
       const idx = await cache.match(scoped('./index.html'));
-      const src = event.source;
       if (src) src.postMessage({ type: idx ? 'offline-ready' : 'offline-pending', cache: CACHE_NAME });
+    })());
+  }
+
+  if (data.type === 'cache-all') {
+    event.waitUntil((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      const total = PRECACHE.length;
+      let done = 0;
+      if (src) src.postMessage({ type: 'cache-progress', done: 0, total });
+      for (const path of PRECACHE) {
+        try {
+          const url = scoped(path);
+          const res = await fetch(url, { cache: 'no-cache' });
+          if (res && (res.ok || res.type === 'opaque')) await cache.put(url, res.clone());
+        } catch (err) { /* ignore individual failures */ }
+        done++;
+        if (src) src.postMessage({ type: 'cache-progress', done, total });
+      }
+      if (src) src.postMessage({ type: 'offline-ready', cache: CACHE_NAME });
     })());
   }
 });

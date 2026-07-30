@@ -328,6 +328,10 @@
     #offtoast .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:offspin .8s linear infinite}
     #offtoast.ready .spin{display:none}
     @keyframes offspin{to{transform:rotate(360deg)}}
+    #offtoast-bar{width:74px;height:5px;border-radius:3px;background:rgba(255,255,255,.24);overflow:hidden;flex:0 0 auto;display:none}
+    #offtoast.downloading #offtoast-bar{display:block}
+    #offtoast-bar i{display:block;height:100%;width:0;background:#28c840;transition:width .25s ease}
+    #dlBtn.saved{color:#15803d;border-color:#bbf7d0;background:#f0fdf4}
     #offpill{position:fixed;left:50%;bottom:max(72px,calc(env(safe-area-inset-bottom) + 66px));transform:translateX(-50%);z-index:88;
       display:none;align-items:center;gap:8px;background:#1d1d1f;color:#fff;font-weight:700;font-size:12.5px;padding:9px 15px;border-radius:999px;opacity:.94}
     #offpill .dot{width:8px;height:8px;border-radius:50%;background:#febc2e}
@@ -355,6 +359,7 @@
     <div class="tbrow">
       <div class="brand"><img src="assets/ch-logo.svg" alt="" style="height:24px"><span>Sổ <b>CLB</b> số</span></div>
       <div class="spacer"></div>
+      <button class="langtog" id="dlBtn" title="Unduh untuk offline / Save for offline" aria-label="Download for offline"></button>
       <button class="langtog" id="langBtn" title="Ngôn ngữ / Language" aria-label="Toggle language English or Vietnamese"><b>EN</b> · VI</button>
       <button class="iconbtn" id="fsBtn" title="Fullscreen" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
       <button class="iconbtn" id="closeNav" title="Close" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -400,7 +405,7 @@
     <div class="ov-grid" id="ov-grid"></div></div>
 
   <!-- offline status -->
-  <div id="offtoast"><span class="spin"></span><span class="dot"></span><span id="offtoast-txt"></span></div>
+  <div id="offtoast"><span class="spin"></span><span class="dot"></span><span id="offtoast-txt"></span><span id="offtoast-bar"><i></i></span></div>
   <div id="offpill"><span class="dot"></span><span id="offpill-txt">Offline</span></div>
 
   <!-- inline PDF viewer -->
@@ -855,6 +860,7 @@
     const os=document.querySelector('#dk-ov span');if(os)os.textContent=L('Overview','overview');
     const ot=document.getElementById('ov-title');if(ot)ot.textContent=LANG==='vi'?T.vi.ovTitle:'Overview — jump to a section';
     if(ovSearch)ovSearch.placeholder=L('Search screens…','search');
+    if(typeof updateDlBtn==='function')updateDlBtn();
     buildOverview();if(!posterActive)renderDeck();
   }
   langBtn.onclick=()=>{LANG=(LANG==='vi'?'en':'vi');try{localStorage.setItem('clbLang',LANG);}catch(e){}applyLang();};
@@ -866,17 +872,29 @@
   let offToastT=null,showedSaving=false;
   function showOff(txt,ready,hideMs){ if(!offToast)return; offTxt.textContent=txt; offToast.classList.toggle('ready',!!ready); offToast.classList.add('show');
     clearTimeout(offToastT); if(hideMs)offToastT=setTimeout(()=>offToast.classList.remove('show'),hideMs); }
-  function markOfflineReady(){ try{localStorage.setItem('clbOffline','1');}catch(e){} if(showedSaving){showOff(om('ready'),true,3400);showedSaving=false;} }
+  const offBar=document.querySelector('#offtoast-bar i'),dlBtn=document.getElementById('dlBtn');
+  function dlLabel(saved){var t=saved?(LANG==='vi'?'Đã lưu offline':'Saved offline'):(LANG==='vi'?'Lưu offline':'Save offline');
+    var ic=saved?'<path d="M20 6 9 17l-5-5"/>':'<path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/>';
+    return '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px">'+ic+'</svg> '+t;}
+  function updateDlBtn(){ let saved=false; try{saved=localStorage.getItem('clbOffline')==='1';}catch(e){} if(dlBtn){dlBtn.innerHTML=dlLabel(saved);dlBtn.classList.toggle('saved',saved);} }
+  function showOffProgress(pct){ if(!offToast)return; offToast.classList.add('show','downloading'); offToast.classList.remove('ready'); offTxt.textContent=om('saving')+' '+pct+'%'; if(offBar)offBar.style.width=pct+'%'; }
+  function markOfflineReady(){ try{localStorage.setItem('clbOffline','1');}catch(e){} if(offToast)offToast.classList.remove('downloading'); if(showedSaving){showOff(om('ready'),true,3600);showedSaving=false;} updateDlBtn(); }
+  function downloadOffline(){ if(!('serviceWorker' in navigator))return; showedSaving=true; showOffProgress(0);
+    navigator.serviceWorker.ready.then(reg=>{ const w=reg.active||navigator.serviceWorker.controller; if(w)w.postMessage({type:'cache-all'}); }).catch(()=>{}); }
+  if(dlBtn)dlBtn.onclick=downloadOffline;
   if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
     let savedOffline=false; try{savedOffline=localStorage.getItem('clbOffline')==='1';}catch(e){}
-    navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.type==='offline-ready')markOfflineReady(); });
+    navigator.serviceWorker.addEventListener('message',e=>{ const d=e.data||{};
+      if(d.type==='cache-progress'){ showOffProgress(Math.round(d.done/d.total*100)); }
+      else if(d.type==='offline-ready'){ markOfflineReady(); } });
     window.addEventListener('load',()=>{
       if(!navigator.serviceWorker.controller && !savedOffline){ showedSaving=true; showOff(om('saving'),false,0); }
       navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(()=>{
         const w=navigator.serviceWorker.controller; if(w)w.postMessage({type:'offline-check'});
-      }).catch(()=>{ if(showedSaving)offToast.classList.remove('show'); });
+      }).catch(()=>{ if(showedSaving&&offToast)offToast.classList.remove('show'); });
     });
   }
+  updateDlBtn();
   function setOnline(){ document.body.classList.toggle('offline',!navigator.onLine);
     const p=document.getElementById('offpill-txt'); if(p)p.textContent=om('off'); }
   window.addEventListener('online',setOnline); window.addEventListener('offline',setOnline); setOnline();
