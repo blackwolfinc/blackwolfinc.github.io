@@ -317,6 +317,21 @@
     #dk-play:hover{background:#fff}#dk-play svg{width:20px;height:20px}
     #dk-prog{position:fixed;top:0;left:0;height:3px;width:0;z-index:70;background:var(--brand2);box-shadow:0 0 10px var(--brand2)}
     body.mode-poster #dk-play,body.mode-poster #dk-prog{display:none}
+    /* offline status */
+    #offtoast{position:fixed;left:50%;top:max(14px,env(safe-area-inset-top));transform:translateX(-50%) translateY(-140%);
+      z-index:118;display:flex;align-items:center;gap:9px;background:rgba(22,20,42,.92);color:#fff;font-weight:700;font-size:13.5px;
+      padding:11px 17px;border-radius:999px;box-shadow:0 12px 34px rgba(0,0,0,.34);backdrop-filter:blur(10px);
+      transition:transform .4s cubic-bezier(.4,0,.2,1);white-space:nowrap;max-width:92vw}
+    #offtoast.show{transform:translateX(-50%) translateY(0)}
+    #offtoast .dot{width:9px;height:9px;border-radius:50%;background:#febc2e;flex:0 0 auto}
+    #offtoast.ready .dot{background:#28c840}
+    #offtoast .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:offspin .8s linear infinite}
+    #offtoast.ready .spin{display:none}
+    @keyframes offspin{to{transform:rotate(360deg)}}
+    #offpill{position:fixed;left:50%;bottom:max(72px,calc(env(safe-area-inset-bottom) + 66px));transform:translateX(-50%);z-index:88;
+      display:none;align-items:center;gap:8px;background:#1d1d1f;color:#fff;font-weight:700;font-size:12.5px;padding:9px 15px;border-radius:999px;opacity:.94}
+    #offpill .dot{width:8px;height:8px;border-radius:50%;background:#febc2e}
+    body.offline #offpill{display:flex}
     @media (min-width:900px){#dk-play{width:52px;height:52px}#dk-play svg{width:24px;height:24px}}
     .icard:active,.lcard:active,.geo-card:active,.chan-cards .cc:active,.ov-card:active,.stat-tile:active{transform:scale(.985)}
     @media (prefers-reduced-motion: reduce){
@@ -383,6 +398,10 @@
     <input id="ov-search" type="search" placeholder="Search screens…" autocomplete="off">
     <div id="ov-results"></div>
     <div class="ov-grid" id="ov-grid"></div></div>
+
+  <!-- offline status -->
+  <div id="offtoast"><span class="spin"></span><span class="dot"></span><span id="offtoast-txt"></span></div>
+  <div id="offpill"><span class="dot"></span><span id="offpill-txt">Offline</span></div>
 
   <!-- inline PDF viewer -->
   <div id="pdfview"><div class="pv-bar"><b id="pv-title"></b><div class="pv-x" id="pv-x" role="button" tabindex="0" aria-label="Close PDF">&times;</div></div><iframe id="pv-frame" title="PDF"></iframe></div>
@@ -840,10 +859,27 @@
   }
   langBtn.onclick=()=>{LANG=(LANG==='vi'?'en':'vi');try{localStorage.setItem('clbLang',LANG);}catch(e){}applyLang();};
 
-  /* ==================== service worker (offline PWA) ==================== */
+  /* ==================== offline mode (download-first PWA) ==================== */
+  const offToast=document.getElementById('offtoast'),offTxt=document.getElementById('offtoast-txt');
+  const offMsg={saving:{en:'Saving for offline…',vi:'Đang lưu để dùng ngoại tuyến…'},ready:{en:'Ready — works offline ✓',vi:'Đã sẵn sàng — dùng ngoại tuyến ✓'},off:{en:'Offline — kiosk still running',vi:'Ngoại tuyến — kiosk vẫn chạy'}};
+  function om(k){return offMsg[k][LANG==='vi'?'vi':'en'];}
+  let offToastT=null,showedSaving=false;
+  function showOff(txt,ready,hideMs){ if(!offToast)return; offTxt.textContent=txt; offToast.classList.toggle('ready',!!ready); offToast.classList.add('show');
+    clearTimeout(offToastT); if(hideMs)offToastT=setTimeout(()=>offToast.classList.remove('show'),hideMs); }
+  function markOfflineReady(){ try{localStorage.setItem('clbOffline','1');}catch(e){} if(showedSaving){showOff(om('ready'),true,3400);showedSaving=false;} }
   if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
-    window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});});
+    let savedOffline=false; try{savedOffline=localStorage.getItem('clbOffline')==='1';}catch(e){}
+    navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.type==='offline-ready')markOfflineReady(); });
+    window.addEventListener('load',()=>{
+      if(!navigator.serviceWorker.controller && !savedOffline){ showedSaving=true; showOff(om('saving'),false,0); }
+      navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(()=>{
+        const w=navigator.serviceWorker.controller; if(w)w.postMessage({type:'offline-check'});
+      }).catch(()=>{ if(showedSaving)offToast.classList.remove('show'); });
+    });
   }
+  function setOnline(){ document.body.classList.toggle('offline',!navigator.onLine);
+    const p=document.getElementById('offpill-txt'); if(p)p.textContent=om('off'); }
+  window.addEventListener('online',setOnline); window.addEventListener('offline',setOnline); setOnline();
 
   /* ==================== background music (poster) ==================== */
   const bgm=document.getElementById('bgm'),sndBtn=document.getElementById('sndBtn');

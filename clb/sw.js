@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'clb-v3';
+const CACHE_NAME = 'clb-v4';
 
 /* App shell + icons/QR + background music */
 const SHELL = [
@@ -113,7 +113,22 @@ self.addEventListener('activate', (event) => {
       names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n))
     );
     await self.clients.claim();
+    // Tell open pages everything is cached and offline is ready.
+    const clients = await self.clients.matchAll({ includeUncontrolled: true });
+    clients.forEach((c) => c.postMessage({ type: 'offline-ready', cache: CACHE_NAME }));
   })());
+});
+
+// Allow a page to ask whether offline is ready.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'offline-check') {
+    event.waitUntil((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      const idx = await cache.match(scoped('./index.html'));
+      const src = event.source;
+      if (src) src.postMessage({ type: idx ? 'offline-ready' : 'offline-pending', cache: CACHE_NAME });
+    })());
+  }
 });
 
 self.addEventListener('fetch', (event) => {
@@ -121,19 +136,17 @@ self.addEventListener('fetch', (event) => {
 
   if (request.method !== 'GET') return;
 
-  // Navigation requests: network-first, fall back to cached index.html.
+  // Navigation: cache-first for instant offline load, refresh index in background.
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
-      try {
-        const fresh = await fetch(request);
-        return fresh;
-      } catch (err) {
-        const cache = await caches.open(CACHE_NAME);
-        const cached =
-          (await cache.match(scoped('./index.html'))) ||
-          (await cache.match(scoped('./')));
-        return cached || Response.error();
-      }
+      const cache = await caches.open(CACHE_NAME);
+      const cached =
+        (await cache.match(scoped('./index.html'))) ||
+        (await cache.match(scoped('./')));
+      const net = fetch(request)
+        .then((r) => { if (r && r.ok) cache.put(scoped('./index.html'), r.clone()); return r; })
+        .catch(() => null);
+      return cached || (await net) || Response.error();
     })());
     return;
   }
