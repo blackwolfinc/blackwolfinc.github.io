@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'clb-v6';
+const CACHE_NAME = 'clb-v7';
 
 /* App shell + icons/QR + background music */
 const SHELL = [
