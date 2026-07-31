@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'clb-v7';
+const CACHE_NAME = 'clb-v8';
 
 /* App shell + icons/QR + background music */
 const SHELL = [
@@ -60,6 +60,12 @@ const APP = [
   './app/vitals.webp',
   './app/welcome.webp',
   './app/wellbeing.webp',
+  './app/journey/1.webp',
+  './app/journey/2.webp',
+  './app/journey/3.webp',
+  './app/journey/4.webp',
+  './app/journey/5.webp',
+  './app/journey/6.webp',
 ];
 
 /* posters/*.webp */

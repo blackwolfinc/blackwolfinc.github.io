@@ -279,6 +279,23 @@
     .geo-list{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
     .geo-list li{display:flex;align-items:center;gap:9px;font-size:13.5px;color:#4b5563;line-height:1.4}
     .geo-list li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--line);flex:0 0 auto}
+    /* ---- journey (auto-cycling 6 stages) ---- */
+    .step-journey{text-align:center}
+    .jr-eyebrow{font-size:clamp(12px,1.5vw,14px);font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--brand2)}
+    .step-journey h1{font-size:clamp(26px,4.4vw,48px);color:var(--brand);letter-spacing:-.02em;line-height:1.08;margin:12px auto 0;max-width:820px}
+    .jr-body{display:flex;flex-wrap:wrap;gap:clamp(24px,5vw,60px);align-items:center;justify-content:center;margin-top:clamp(20px,4vh,40px)}
+    .jr-art{position:relative;width:min(360px,42vh,80vw);aspect-ratio:1;flex:0 0 auto;background:var(--surface);border-radius:24px;border:1px solid var(--line);overflow:hidden}
+    .jr-img{position:absolute;inset:6%;width:88%;height:88%;object-fit:contain;opacity:0;transform:scale(.96);transition:opacity .5s ease,transform .5s ease}
+    .jr-img.on{opacity:1;transform:none}
+    .jr-cap{text-align:left;min-width:220px}
+    .jr-count{font-size:14px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+    .jr-title{font-size:clamp(28px,3.6vw,40px);font-weight:800;color:var(--brand);letter-spacing:-.02em;margin-top:6px;min-height:1.1em}
+    .jr-sub{font-size:clamp(15px,1.9vw,18px);color:#4b5563;margin-top:4px}
+    .jr-dots{display:flex;gap:8px;margin-top:20px}
+    .jr-dots i{width:9px;height:9px;border-radius:50%;background:var(--line);transition:.3s}
+    .jr-dots i.on{background:var(--brand2);transform:scale(1.25)}
+    @media (orientation:portrait){.jr-body{flex-direction:column}.jr-cap{text-align:center}.jr-dots{justify-content:center}}
+    @media (min-width:900px){.step-journey h1{font-size:clamp(40px,5vw,58px)}.jr-art{width:min(440px,46vh,82vw)}.jr-title{font-size:clamp(34px,4vw,44px)}.jr-sub{font-size:18px}}
     /* ---- partners ---- */
     .step-partners{text-align:center}
     .step-partners h1{font-size:clamp(24px,4vw,42px);color:var(--brand);letter-spacing:-.02em;line-height:1.1;margin:14px auto 0;max-width:820px}
@@ -622,6 +639,8 @@
   const STEPS=[],CH=[],shots=[];
   CH.push({name:'Intro',no:'',accent:'#4b47c9',start:0});
   STEPS.push({type:'intro',chapter:'Intro',accent:'#4b47c9'});
+  CH.push({name:'Journey',no:'',accent:'#2f6df6',start:STEPS.length});
+  STEPS.push({type:'journey',chapter:'Journey',accent:'#2f6df6'});
   SECTIONS.forEach(sec=>{
     CH.push({name:sec.kick,no:sec.no,accent:sec.ch,start:STEPS.length});
     STEPS.push({type:'chapter',sec,chapter:sec.kick,accent:sec.ch});
@@ -721,10 +740,43 @@
       return '<div class="step step-partners" style="--ch:'+s.accent+'"><div class="kick"><i></i><span>'+L('Partners','partnersKick')+'</span></div>'+
         '<h1>'+L('Trusted for 10+ years','partnersH1')+'</h1>'+
         '<div class="partners-img"><img src="app/partners.webp" alt="'+L('Partner organisations across Singapore','partnersAlt')+'"></div></div>';
+    if(s.type==='journey')
+      return '<div class="step step-journey" style="--ch:'+s.accent+'">'+
+        '<div class="jr-eyebrow">'+L('The Journey','journeyKick')+'</div>'+
+        '<h1>'+L('One senior. One record.','journeyH1')+'</h1>'+
+        '<div class="jr-body"><div class="jr-art">'+
+          JOURNEY.map((j,i)=>'<img class="jr-img'+(i===0?' on':'')+'" src="app/journey/'+(i+1)+'.webp" alt="'+esc(j[1])+'">').join('')+
+        '</div><div class="jr-cap">'+
+          '<div class="jr-count"><span class="jr-n">1</span> / '+JOURNEY.length+'</div>'+
+          '<div class="jr-title">'+esc(JOURNEY[0][0])+'</div>'+
+          '<div class="jr-sub">'+esc(JOURNEY[0][1])+'</div>'+
+          '<div class="jr-dots">'+JOURNEY.map((j,i)=>'<i'+(i===0?' class="on"':'')+'></i>').join('')+'</div>'+
+        '</div></div></div>';
     return '';
   }
+  /* Journey = the vietnam-loop 6-stage story: [VN stage, EN subtitle] */
+  const JOURNEY=[
+    ['Tham gia','Join the club'],
+    ['Sinh hoạt','Activities & health'],
+    ['Tín hiệu','An early signal'],
+    ['Chăm sóc tại nhà','Support at home'],
+    ['Xuất viện','After hospital'],
+    ['Trở lại','Back to the community']
+  ];
+  let journeyTimer=null,journeyIdx=0;
+  function stopJourney(){if(journeyTimer){clearInterval(journeyTimer);journeyTimer=null;}}
+  function setJourneyStage(i){
+    const imgs=deck.querySelectorAll('.jr-img');if(!imgs.length)return;
+    i=((i%JOURNEY.length)+JOURNEY.length)%JOURNEY.length;journeyIdx=i;
+    imgs.forEach((im,k)=>im.classList.toggle('on',k===i));
+    deck.querySelectorAll('.jr-dots i').forEach((d,k)=>d.classList.toggle('on',k===i));
+    const t=deck.querySelector('.jr-title'),sub=deck.querySelector('.jr-sub'),n=deck.querySelector('.jr-n');
+    if(t)t.textContent=JOURNEY[i][0];if(sub)sub.textContent=JOURNEY[i][1];if(n)n.textContent=(i+1);
+  }
+  function startJourney(){stopJourney();journeyIdx=0;setJourneyStage(0);journeyTimer=setInterval(()=>setJourneyStage(journeyIdx+1),2300);}
   function renderDeck(){
     const s=STEPS[deckIdx];
+    if(typeof stopJourney==='function')stopJourney();
     deck.innerHTML=stepHTML(s);
     deck.scrollTop=0;
     const el=deck.firstElementChild;if(el)el.classList.add(deckDir<0?'from-l':'from-r');
@@ -733,6 +785,7 @@
     if(_im&&_im.decode){_im.decode().then(_in).catch(_in);}else _in();
     var nx=STEPS[deckIdx+1];if(nx&&nx.type==='screen'){var im=new Image();im.src='app/'+nx.file+'.webp';if(im.decode)im.decode().catch(()=>{});}
     if(s.type==='stats')animateStats();
+    if(s.type==='journey'&&typeof startJourney==='function')startJourney();
     if(typeof updateHash==='function')updateHash();
     if(typeof deckSchedule==='function')deckSchedule();
     // wire interactions
@@ -871,14 +924,14 @@
       {b:"Một cửa duy nhất vào dữ liệu",span:"Các ứng dụng đều đi qua cổng kết nối với phiên riêng cho từng người — quyền truy cập do hệ thống lõi quyết định."}
     ]}
   };
-  const T={vi:{numbers:"Số liệu",statsH1:"Quy mô vận hành",stat1:"lượt điểm danh mỗi ngày (chủ yếu qua kiosk tự phục vụ)",stat2:"người cao tuổi",stat3:"hoạt động",stat4:"các Trung tâm Sinh hoạt NCT ở Singapore dùng CaritaHub",illustrative:"Số liệu minh họa.",whereRuns:"Nơi đang vận hành",geoH1:"Ba quốc gia, một nền tảng",sg1:"Trung tâm Sinh hoạt NCT",daycare:"chăm sóc ban ngày",homecare:"chăm sóc tại nhà",nursing:"viện dưỡng lão",id1:"nhà ở dưỡng lão",id2:"câu lạc bộ NCT",vn1:"câu lạc bộ",scanTitle:"Quét để mở trên điện thoại",overview:"Tổng quan",ovTitle:"Tổng quan — chuyển tới một phần",search:"Tìm màn hình…",tapZoom:"Chạm để phóng to",manual:"Xem hướng dẫn (PDF)",seeScreens:"Chạm → để xem từng màn hình",printKick:"Bản in",manualsKick:"Hướng dẫn",screens:"màn hình",section:"phần",partnersKick:"Đối tác",partnersH1:"Hơn 10 năm được tin cậy",partnersAlt:"Các tổ chức đối tác tại Singapore"}};
+  const T={vi:{numbers:"Số liệu",statsH1:"Quy mô vận hành",stat1:"lượt điểm danh mỗi ngày (chủ yếu qua kiosk tự phục vụ)",stat2:"người cao tuổi",stat3:"hoạt động",stat4:"các Trung tâm Sinh hoạt NCT ở Singapore dùng CaritaHub",illustrative:"Số liệu minh họa.",whereRuns:"Nơi đang vận hành",geoH1:"Ba quốc gia, một nền tảng",sg1:"Trung tâm Sinh hoạt NCT",daycare:"chăm sóc ban ngày",homecare:"chăm sóc tại nhà",nursing:"viện dưỡng lão",id1:"nhà ở dưỡng lão",id2:"câu lạc bộ NCT",vn1:"câu lạc bộ",scanTitle:"Quét để mở trên điện thoại",overview:"Tổng quan",ovTitle:"Tổng quan — chuyển tới một phần",search:"Tìm màn hình…",tapZoom:"Chạm để phóng to",manual:"Xem hướng dẫn (PDF)",seeScreens:"Chạm → để xem từng màn hình",printKick:"Bản in",manualsKick:"Hướng dẫn",screens:"màn hình",section:"phần",partnersKick:"Đối tác",partnersH1:"Hơn 10 năm được tin cậy",partnersAlt:"Các tổ chức đối tác tại Singapore",journeyKick:"Hành trình",journeyH1:"Một người cao tuổi. Một hồ sơ."}};
   const PR_EN=[
     {b:"Consent is a first-class record",span:"Family pages refuse to render without consent; withdrawing it kills links already shared."},
     {b:"Attention levels, never diagnosis",span:"No condition fields, no scores; safety info is written as staff instructions. Medication is a reminder log."},
     {b:"Each channel sees exactly its share",span:"Family: no health data. Volunteers: only assigned work. Station resets after 45s. Province: aggregates only."},
     {b:"One door into the data",span:"Apps go through the gateway with per-user sessions — access is decided by the core system."}
   ];
-  const NAMEVI={"Intro":"Giới thiệu","Numbers":T.vi.numbers,"Where it runs":T.vi.whereRuns,"Partners":T.vi.partnersKick,"Print":T.vi.printKick,"Manuals":T.vi.manualsKick,"Principles":"Nguyên tắc"};
+  const NAMEVI={"Intro":"Giới thiệu","Journey":T.vi.journeyKick,"Numbers":T.vi.numbers,"Where it runs":T.vi.whereRuns,"Partners":T.vi.partnersKick,"Print":T.vi.printKick,"Manuals":T.vi.manualsKick,"Principles":"Nguyên tắc"};
   let LANG='en'; try{LANG=localStorage.getItem('clbLang')||'en';}catch(e){}
   function tc(en,vi){return (LANG==='vi'&&vi!=null&&vi!=='')?vi:en;}
   function L(en,key){return (LANG==='vi'&&T.vi&&T.vi[key]!=null)?T.vi[key]:en;}
@@ -908,7 +961,7 @@
   const IC_PLAY2='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
   const IC_PAUSE2='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
   function modalOpen(){return lb.classList.contains('open')||ov.classList.contains('open')||pdfv.classList.contains('open');}
-  function stepMs(){ var s=STEPS[deckIdx]; return (s&&s.type!=='screen')?Math.round(DECK_MS*1.5):DECK_MS; }
+  function stepMs(){ var s=STEPS[deckIdx]; if(s&&s.type==='journey')return Math.max(14500,Math.round(DECK_MS*1.5)); return (s&&s.type!=='screen')?Math.round(DECK_MS*1.5):DECK_MS; }
   function runProg(ms){ if(!dkProg)return; dkProg.style.transition='none'; dkProg.style.width='0%';
     if(deckAuto&&!posterActive&&!modalOpen()){ requestAnimationFrame(()=>{ dkProg.style.transition='width '+ms+'ms linear'; dkProg.style.width='100%'; }); } }
   function deckSchedule(){ clearTimeout(deckTimer);
