@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'clb-v5';
+const CACHE_NAME = 'clb-v6';
 
 /* App shell + icons/QR + background music */
 const SHELL = [
@@ -69,6 +69,7 @@ const POSTERS = [
   './posters/3.webp',
   './posters/4.webp',
   './posters/5.webp',
+  './posters/6.webp',
 ];
 
 /* assets/print/*.pdf */

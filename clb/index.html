@@ -79,6 +79,9 @@
       transition:opacity calc(var(--fade-ms)*1ms) ease-in-out;pointer-events:none;padding:clamp(8px,2.5vmin,40px)}
     .slide.active{opacity:1}
     .slide img{max-width:100%;max-height:100%;object-fit:contain;border-radius:clamp(4px,1.2vmin,14px);box-shadow:0 30px 80px rgba(0,0,0,.55)}
+    /* fill-screen (stretch full) — for iMin kiosk portrait */
+    body.poster-fill #stage .slide{padding:0}
+    body.poster-fill #stage .slide img{width:100%;height:100%;max-width:none;max-height:none;object-fit:fill;border-radius:0;box-shadow:none}
     #bar{position:absolute;top:0;left:0;height:3px;width:0;z-index:20;background:linear-gradient(90deg,#0a84ff,#64a7ff);box-shadow:0 0 12px rgba(10,132,255,.5)}
     #dots{position:absolute;bottom:max(22px,calc(env(safe-area-inset-bottom) + 16px));left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:20;transition:opacity .4s}
     .dot{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:.3s}
@@ -476,6 +479,7 @@
       <div class="set-row"><span id="set-speed-l">Speed</span><div class="seg" id="set-speed"><button data-v="6000">6s</button><button data-v="8500">8s</button><button data-v="11000">11s</button></div></div>
       <div class="set-row"><span id="set-anim-l">Page animation</span><button class="tgl" id="set-anim" role="switch" aria-label="Page animation"></button></div>
       <div class="set-row"><span id="set-music-l">Music</span><button class="tgl" id="set-music" role="switch" aria-label="Music"></button></div>
+      <div class="set-row"><span id="set-fill-l">Fill screen (kiosk)</span><button class="tgl" id="set-fill" role="switch" aria-label="Fill screen"></button></div>
       <div class="set-row"><span id="set-off-l">Offline</span><button class="setbtn2" id="set-offline">Save offline</button></div>
     </div>
   </div>
@@ -488,7 +492,7 @@
 
   <script>
   /* ==================== POSTER ==================== */
-  const POSTERS=["posters/1.webp","posters/2.webp","posters/3.webp","posters/4.webp","posters/5.webp"];
+  const POSTERS=["posters/6.webp","posters/1.webp","posters/2.webp","posters/3.webp","posters/4.webp","posters/5.webp"];
   const stage=document.getElementById('stage'),dotsWrap=document.getElementById('dots'),bar=document.getElementById('bar');
   const SLIDE_MS=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slide-seconds'))||8)*1000;
   let pIdx=0,pPlaying=true,pTimer=null,pStart=0,pRAF=null,posterActive=true,pHold=false;
@@ -1016,15 +1020,17 @@
   /* ==================== settings panel ==================== */
   const setEl=document.getElementById('settings'),setBtn=document.getElementById('setBtn');
   let animOn=true; try{animOn=localStorage.getItem('clbAnim')!=='0';}catch(e){}
+  let fillOn=false; try{fillOn=localStorage.getItem('clbFill')==='1';}catch(e){}
   try{var _sp=parseInt(localStorage.getItem('clbSpeed'),10); if(_sp>=2000&&_sp<=60000)DECK_MS=_sp;}catch(e){}
   document.body.classList.toggle('noanim',!animOn);
-  const setTxt={title:{en:'Settings',vi:'Cài đặt'},lang:{en:'Language',vi:'Ngôn ngữ'},auto:{en:'Auto-play',vi:'Tự động chạy'},speed:{en:'Speed',vi:'Tốc độ'},anim:{en:'Page animation',vi:'Hiệu ứng lật trang'},music:{en:'Music',vi:'Nhạc nền'},off:{en:'Offline',vi:'Ngoại tuyến'},save:{en:'Save offline',vi:'Lưu offline'},saved:{en:'Saved ✓',vi:'Đã lưu ✓'}};
+  document.body.classList.toggle('poster-fill',fillOn);
+  const setTxt={title:{en:'Settings',vi:'Cài đặt'},lang:{en:'Language',vi:'Ngôn ngữ'},auto:{en:'Auto-play',vi:'Tự động chạy'},speed:{en:'Speed',vi:'Tốc độ'},anim:{en:'Page animation',vi:'Hiệu ứng lật trang'},music:{en:'Music',vi:'Nhạc nền'},fill:{en:'Fill screen (kiosk)',vi:'Lấp đầy màn hình (kiosk)'},off:{en:'Offline',vi:'Ngoại tuyến'},save:{en:'Save offline',vi:'Lưu offline'},saved:{en:'Saved ✓',vi:'Đã lưu ✓'}};
   function st(k){return setTxt[k][LANG==='vi'?'vi':'en'];}
   function setToggle(id,on){var b=document.getElementById(id);if(b)b.classList.toggle('on',!!on);}
   function setSeg(wrapId,val){var w=document.getElementById(wrapId);if(!w)return;w.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.v===String(val));});}
-  function reflectSettings(){ setSeg('set-lang',LANG); setToggle('set-auto',deckAuto); setSeg('set-speed',DECK_MS); setToggle('set-anim',animOn); setToggle('set-music',!bgmMuted);
+  function reflectSettings(){ setSeg('set-lang',LANG); setToggle('set-auto',deckAuto); setSeg('set-speed',DECK_MS); setToggle('set-anim',animOn); setToggle('set-music',!bgmMuted); setToggle('set-fill',fillOn);
     var saved=false;try{saved=localStorage.getItem('clbOffline')==='1';}catch(e){} var ob=document.getElementById('set-offline'); if(ob){ob.textContent=saved?st('saved'):st('save');ob.classList.toggle('saved',saved);} }
-  function settingsApplyLang(){ document.getElementById('set-title').textContent=st('title'); document.getElementById('set-lang-l').textContent=st('lang'); document.getElementById('set-auto-l').textContent=st('auto'); document.getElementById('set-speed-l').textContent=st('speed'); document.getElementById('set-anim-l').textContent=st('anim'); document.getElementById('set-music-l').textContent=st('music'); document.getElementById('set-off-l').textContent=st('off'); reflectSettings(); }
+  function settingsApplyLang(){ document.getElementById('set-title').textContent=st('title'); document.getElementById('set-lang-l').textContent=st('lang'); document.getElementById('set-auto-l').textContent=st('auto'); document.getElementById('set-speed-l').textContent=st('speed'); document.getElementById('set-anim-l').textContent=st('anim'); document.getElementById('set-music-l').textContent=st('music'); document.getElementById('set-fill-l').textContent=st('fill'); document.getElementById('set-off-l').textContent=st('off'); reflectSettings(); }
   function openSettings(){ settingsApplyLang(); setEl.classList.add('open'); }
   function closeSettings(){ setEl.classList.remove('open'); }
   if(setBtn)setBtn.onclick=openSettings;
@@ -1035,6 +1041,7 @@
   document.getElementById('set-speed').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;DECK_MS=parseInt(b.dataset.v,10);try{localStorage.setItem('clbSpeed',String(DECK_MS));}catch(_){} deckSchedule(); reflectSettings();});
   document.getElementById('set-anim').onclick=function(){animOn=!animOn;try{localStorage.setItem('clbAnim',animOn?'1':'0');}catch(_){} document.body.classList.toggle('noanim',!animOn); reflectSettings();};
   document.getElementById('set-music').onclick=function(){bgmMuted=!bgmMuted;try{localStorage.setItem('clbMuted',bgmMuted?'1':'0');}catch(_){} if(!bgmMuted)userGesture=true; updateBGM(); reflectSettings();};
+  document.getElementById('set-fill').onclick=function(){fillOn=!fillOn;try{localStorage.setItem('clbFill',fillOn?'1':'0');}catch(_){} document.body.classList.toggle('poster-fill',fillOn); reflectSettings();};
   document.getElementById('set-offline').onclick=function(){ if(typeof downloadOffline==='function')downloadOffline(); };
 
   /* ==================== enhancements: haptics, lightbox gestures, idle-home, URL config ==================== */
@@ -1056,7 +1063,9 @@
     var lg=P.get('lang'); if(lg==='vi'||lg==='en'){LANG=lg;try{localStorage.setItem('clbLang',LANG);}catch(e){}}
     if(P.get('auto')==='0'){deckAuto=false;try{localStorage.setItem('clbDeckAuto','0');}catch(e){}}
     var sp=parseInt(P.get('speed'),10); if(sp>=2000&&sp<=60000)DECK_MS=sp;
-    if(P.get('kiosk')==='1'){document.addEventListener('pointerdown',function(){var el=document.documentElement,rf=el.requestFullscreen||el.webkitRequestFullscreen;if(rf)try{rf.call(el);}catch(e){}},{once:true});}
+    if(P.get('kiosk')==='1'){ fillOn=true; document.body.classList.add('poster-fill');
+      document.addEventListener('pointerdown',function(){var el=document.documentElement,rf=el.requestFullscreen||el.webkitRequestFullscreen;if(rf)try{rf.call(el);}catch(e){}},{once:true});}
+    if(P.get('fill')==='1'){fillOn=true;document.body.classList.add('poster-fill');} else if(P.get('fill')==='0'){fillOn=false;document.body.classList.remove('poster-fill');}
     if(P.get('tab')==='app'){switchTab('app');}
   })();
 
