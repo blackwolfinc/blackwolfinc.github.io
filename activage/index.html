@@ -80,6 +80,9 @@ a.nav-cta{height:44px;padding:0 18px;box-sizing:border-box;align-items:center;bo
 a.nav-cta:hover{background:#26557F;color:#FFFFFF}
 a.wa-btn{display:none;flex:0 0 auto;width:72px;min-height:58px;box-sizing:border-box;border-radius:16px;border:1.5px solid #BFE0CB;background:#F0F8F3;color:#147A43;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:0.64em;line-height:1;font-weight:900;text-decoration:none}
 a.wa-btn:hover{background:#E2F2E8;color:#0F5F34}
+.soon{margin:0;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 10px;border-radius:999px;background:#E6EFF8;color:#26557F;font-size:0.76em;line-height:1.3;font-weight:900}
+.soon-dot{width:8px;height:8px;border-radius:50%;background:#2F9E5B;box-shadow:0 0 0 3px rgba(47,158,91,.2);animation:soonpulse 2.4s ease-in-out infinite}
+@keyframes soonpulse{0%,100%{box-shadow:0 0 0 3px rgba(47,158,91,.2)}50%{box-shadow:0 0 0 6px rgba(47,158,91,.06)}}
 .desk-only{display:none !important}
 
 /* hero layout */
@@ -212,6 +215,7 @@ a.share:hover{text-underline-offset:6px}
   main.main{flex-direction:column !important;flex-wrap:nowrap !important;align-items:stretch !important;align-content:stretch !important;gap:0 !important;padding:0 0 calc(98px + env(safe-area-inset-bottom)) !important;box-sizing:border-box;min-height:calc(100vh - 64px);min-height:calc(100svh - 64px)}
   .halo{order:1;flex:0 0 auto !important;width:100%;box-sizing:border-box;padding:22px 20px 0;z-index:auto !important}
   .halo::before{display:none}
+  .soon{margin-bottom:12px}
   .t-h1{font-size:2.2em !important;line-height:1.04 !important}
   .t-sub{margin-top:10px !important;font-size:1em !important;line-height:1.4 !important}
   .ill{order:2;flex:1 1 auto;width:100%;display:flex;flex-direction:column;min-height:0;margin:18px 0 0 !important}
@@ -250,6 +254,32 @@ a.share:hover{text-underline-offset:6px}
 @media (max-height: 600px){ @container page (max-width: 899px){ .car-bar{display:none} .t-h1{font-size:2em !important} .halo{padding-top:16px} .ill{margin-top:14px !important} .slide[data-k="modul"] .ill-desk{object-position:50% 45%} } }
 @container page (min-width: 600px) and (max-width: 899px){ .nav,.halo,.car,footer.foot{padding-left:40px;padding-right:40px} .sp-cta{padding-left:40px !important;padding-right:40px !important;justify-content:center} a.cta{max-width:440px} .car-stage{max-height:none !important} }
 @media (min-height: 780px) and (max-aspect-ratio: 5/8){ @container page (max-width: 899px){ .slide[data-k="masuk"] .ill-desk,.slide[data-k="modul"] .ill-desk{display:none !important} .slide[data-k="masuk"] .ill-phone,.slide[data-k="modul"] .ill-phone{display:block !important;object-fit:cover;object-position:50% 40%;height:100%} } }
+/* ===== desktop: picture sized from screen height (laptops 1366x657 etc.), bigger layout on large screens ===== */
+@container page (min-width: 900px){ .soon{margin-bottom:2px} .car{max-width:min(480px, calc(100vh - 300px));max-width:min(480px, calc(100svh - 300px))} }
+@media (max-height: 760px){ @container page (min-width: 900px){
+  .nav{min-height:68px;padding:10px 0} .logo{height:40px}
+  .car-stage{aspect-ratio:1/1 !important}
+  .car{max-width:min(480px, calc(100vh - 290px));max-width:min(480px, calc(100svh - 290px))}
+  .car-bar{margin-top:10px}
+  .t-h1{font-size:clamp(1.9em, 7.2vh, 3.6em) !important}
+  .foot{padding:2px 0 8px}
+  .cred{gap:32px;padding:10px 28px}
+  .cr-g{gap:5px}
+  .cr-row,.cr-lg{height:34px} .cr-ps{min-height:34px} .cr-lg img{max-height:none}
+  .lg-carita{height:18px}.lg-rukun{height:33px}.lg-irl{height:33px}.lg-wulan{height:22px}.lg-ssi{height:33px}
+  .foot-copy{margin-top:6px}
+} }
+@media (min-width: 1600px) and (min-height: 940px){
+  .screen.page-bg{font-size:22px !important}
+  .page-bg:has(button.zoom[aria-pressed="true"]){font-size:26px !important}
+  @container page (min-width: 900px){
+    .page-inner{max-width:1380px !important}
+    .nav{min-height:88px} .logo{height:52px}
+    .car{max-width:min(580px, calc(100vh - 340px));max-width:min(580px, calc(100svh - 340px))}
+    .cr-row,.cr-lg{height:48px} .cr-ps{min-height:48px}
+    .lg-carita{height:25px}.lg-rukun{height:46px}.lg-irl{height:46px}.lg-wulan{height:30px}.lg-ssi{height:46px}
+  }
+}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition:none !important}
 }
@@ -299,6 +329,7 @@ a.share:hover{text-underline-offset:6px}
 </div>
 
 <div class="halo" style="flex: 3 1 560px; min-width: 0; display: flex; flex-direction: column; gap: clamp(7px, 1.4vw, 18px)">
+<p class="rise r1 soon"><span class="soon-dot" aria-hidden="true"></span>Segera hadir</p>
 <h1 id="judul" class="rise r1 t-h1" style="margin: 0; font-size: clamp(1.9em, 4.6vw, 3.6em); line-height: 1.06; font-weight: 900; letter-spacing: -0.01em; text-wrap: balance; color: #16263F">Sehat bareng,<br class="h-br"> seru bareng.</h1>
 <p class="rise r3 t-sub" style="margin: 0; font-size: clamp(1em, 1.35vw, 1.18em); line-height: 1.45; font-weight: 600; color: #2E3A52; max-width: 30em; text-wrap: pretty">Senam, ngobrol, dan kumpul sama teman&#160;seumuran. Semua dari&#160;HP.</p>
 
